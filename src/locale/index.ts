@@ -1,6 +1,7 @@
 const i18n = {
   'en-US': {
     'menu.dashboard': 'Dashboard',
+    'menu.categories': 'Categories',
     'menu.dashboard.workplace': 'Workplace',
     'menu.user.info': 'User Info',
     'menu.user.setting': 'User Setting',
@@ -8,6 +9,7 @@ const i18n = {
     'menu.user.role.admin': 'Admin',
     'menu.user.role.user': 'General User',
     'navbar.logout': 'Logout',
+    'navbar.publish': 'Publish',
     'settings.title': 'Settings',
     'settings.themeColor': 'Theme Color',
     'settings.content': 'Content Setting',
@@ -39,6 +41,7 @@ const i18n = {
   },
   'zh-CN': {
     'menu.dashboard': '仪表盘',
+    'menu.categories': '分类管理',
     'menu.dashboard.workplace': '工作台',
     'menu.user.info': '用户信息',
     'menu.user.setting': '用户设置',
@@ -46,6 +49,7 @@ const i18n = {
     'menu.user.role.admin': '管理员',
     'menu.user.role.user': '普通用户',
     'navbar.logout': '退出登录',
+    'navbar.publish': '发布文章',
     'settings.title': '页面配置',
     'settings.themeColor': '主题色',
     'settings.content': '内容区域',

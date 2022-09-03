@@ -1,34 +1,26 @@
 import React, { useContext, useEffect } from 'react';
 import {
   Tooltip,
-  Input,
   Avatar,
   Select,
   Dropdown,
   Menu,
-  Divider,
   Message,
   Button,
 } from '@arco-design/web-react';
 import {
   IconLanguage,
-  IconNotification,
   IconSunFill,
   IconMoonFill,
-  IconUser,
   IconSettings,
   IconPoweroff,
-  IconExperiment,
-  IconDashboard,
-  IconInteraction,
-  IconTag,
+  IconEdit,
 } from '@arco-design/web-react/icon';
 import { useSelector, useDispatch } from 'react-redux';
-import { GlobalState } from '@/store';
+import {ReducerState} from '@/redux';
 import { GlobalContext } from '@/context';
 import useLocale from '@/utils/useLocale';
 import Logo from '@/assets/logo.svg';
-import MessageBox from '@/components/MessageBox';
 import IconButton from './IconButton';
 import Settings from '../Settings';
 import styles from './style/index.module.less';
@@ -38,7 +30,7 @@ import { generatePermission } from '@/routes';
 
 function Navbar({ show }: { show: boolean }) {
   const t = useLocale();
-  const userInfo = useSelector((state: GlobalState) => state.userInfo);
+  const userInfo = useSelector((state: ReducerState) => state.login.userInfo);
   const dispatch = useDispatch();
 
   const [_, setUserStatus] = useStorage('userStatus');
@@ -47,7 +39,8 @@ function Navbar({ show }: { show: boolean }) {
   const { setLang, lang, theme, setTheme } = useContext(GlobalContext);
 
   function logout() {
-    setUserStatus('logout');
+    localStorage.removeItem('token')
+    localStorage.removeItem('userInfo')
     window.location.href = '/login';
   }
 
@@ -83,14 +76,14 @@ function Navbar({ show }: { show: boolean }) {
     );
   }
 
-  const handleChangeRole = () => {
+  /*const handleChangeRole = () => {
     const newRole = role === 'admin' ? 'user' : 'admin';
     setRole(newRole);
-  };
+  };*/
 
   const droplist = (
     <Menu onClickMenuItem={onMenuItemClick}>
-      <Menu.SubMenu
+      {/*<Menu.SubMenu
         key="role"
         title={
           <>
@@ -107,8 +100,8 @@ function Navbar({ show }: { show: boolean }) {
           <IconTag className={styles['dropdown-icon']} />
           {t['menu.user.switchRoles']}
         </Menu.Item>
-      </Menu.SubMenu>
-      <Menu.Item key="setting">
+      </Menu.SubMenu>*/}
+      {/*<Menu.Item key="setting">
         <IconSettings className={styles['dropdown-icon']} />
         {t['menu.user.setting']}
       </Menu.Item>
@@ -127,7 +120,11 @@ function Navbar({ show }: { show: boolean }) {
         </Menu.Item>
       </Menu.SubMenu>
 
-      <Divider style={{ margin: '4px 0' }} />
+      <Divider style={{ margin: '4px 0' }} />*/}
+      <Menu.Item key="publish">
+        <IconEdit className={styles['dropdown-icon']} />
+        {t['navbar.publish']}
+      </Menu.Item>
       <Menu.Item key="logout">
         <IconPoweroff className={styles['dropdown-icon']} />
         {t['navbar.logout']}
@@ -140,16 +137,16 @@ function Navbar({ show }: { show: boolean }) {
       <div className={styles.left}>
         <div className={styles.logo}>
           <Logo />
-          <div className={styles['logo-name']}>Arco Pro</div>
+          <div className={styles['logo-name']}>博客后台管理系统</div>
         </div>
       </div>
       <ul className={styles.right}>
-        <li>
+        {/*<li>
           <Input.Search
             className={styles.round}
             placeholder={t['navbar.search.placeholder']}
           />
-        </li>
+        </li>*/}
         <li>
           <Select
             triggerElement={<IconButton icon={<IconLanguage />} />}
@@ -171,11 +168,11 @@ function Navbar({ show }: { show: boolean }) {
             }}
           />
         </li>
-        <li>
+        {/*<li>
           <MessageBox>
             <IconButton icon={<IconNotification />} />
           </MessageBox>
-        </li>
+        </li>*/}
         <li>
           <Tooltip
             content={

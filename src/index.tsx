@@ -1,14 +1,18 @@
 import './style/global.less';
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { createStore } from 'redux';
+import {applyMiddleware, createStore} from 'redux';
 import { Provider } from 'react-redux';
 import { ConfigProvider } from '@arco-design/web-react';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
 import enUS from '@arco-design/web-react/es/locale/en-US';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import axios from 'axios';
-import rootReducer from './store';
+import Reducer from './redux';
+//引入redux-thunk，用于支持异步action
+import thunk from 'redux-thunk'
+//引入redux-devtools-extension
+import {composeWithDevTools} from 'redux-devtools-extension'
 import PageLayout from './layout';
 import { GlobalContext } from './context';
 import Login from './pages/login';
@@ -17,7 +21,7 @@ import changeTheme from './utils/changeTheme';
 import useStorage from './utils/useStorage';
 import './mock';
 
-const store = createStore(rootReducer);
+const store = createStore(Reducer,composeWithDevTools(applyMiddleware(thunk)))
 
 function Index() {
   const [lang, setLang] = useStorage('arco-lang', 'en-US');

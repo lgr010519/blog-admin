@@ -6,7 +6,7 @@ import {
   IconDashboard,
   IconTag,
   IconMenuFold,
-  IconMenuUnfold,
+  IconMenuUnfold, IconStorage,
 } from '@arco-design/web-react/icon';
 import { useSelector } from 'react-redux';
 import qs from 'query-string';
@@ -17,8 +17,9 @@ import useRoute, { IRoute } from '@/routes';
 import useLocale from './utils/useLocale';
 import getUrlParams from './utils/getUrlParams';
 import lazyload from './utils/lazyload';
-import { GlobalState } from './store';
+import { GlobalState } from './redux/global';
 import styles from './style/layout.module.less';
+import {ReducerState} from "@/redux";
 
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -32,6 +33,8 @@ function getIconFromKey(key) {
       return <IconDashboard className={styles.icon} />;
     case 'example':
       return <IconTag className={styles.icon} />;
+    case 'categories':
+      return <IconStorage className={styles.icon} />;
     default:
       return <div className={styles['icon-empty']} />;
   }
@@ -67,11 +70,14 @@ function PageLayout() {
   const pathname = history.location.pathname;
   const currentComponent = qs.parseUrl(pathname).url.slice(1);
   const locale = useLocale();
-  const { settings, userLoading, userInfo } = useSelector(
-    (state: GlobalState) => state
+  const { settings, userLoading } = useSelector(
+    (state: ReducerState) => state.global
+  );
+  const { userInfo } = useSelector(
+      (state: ReducerState) => state.login
   );
 
-  const [routes, defaultRoute] = useRoute(userInfo?.permissions);
+  const [routes, defaultRoute] = useRoute(userInfo);
   const defaultSelectedKeys = [currentComponent || defaultRoute];
   const paths = (currentComponent || defaultRoute).split('/');
   const defaultOpenKeys = paths.slice(0, paths.length - 1);
