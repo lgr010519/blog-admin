@@ -1,6 +1,18 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import useLocale from "@/utils/useLocale";
-import {Breadcrumb, Button, Card, Form, Input, Message, Modal, Popconfirm, Select, Table} from "@arco-design/web-react";
+import {
+    Breadcrumb,
+    Button,
+    Card,
+    Form,
+    Input,
+    Message,
+    Modal,
+    Popconfirm,
+    Select,
+    Switch,
+    Table
+} from "@arco-design/web-react";
 import styles from './style/index.module.less'
 import {useDispatch, useSelector} from "react-redux";
 import {
@@ -11,16 +23,17 @@ import {
     UPDATE_LOADING,
     UPDATE_PAGINATION
 } from './redux/actionTypes'
-import {getList,create,update,remove} from "@/api/categories";
+import {getList,create,update,remove,updateStatus} from "@/api/tags";
 import {ReducerState} from "@/redux";
-import {EditableCell, EditableRow} from "@/pages/categories/edit";
+import {IconCheck, IconClose} from "@arco-design/web-react/icon";
 
 function Categories() {
     const locale = useLocale()
+    const [title, setTitle] = useState('添加标签')
 
     const columns:any = [
         {
-            title: '分类名称',
+            title: '标签名称',
             dataIndex: 'name',
             align: 'center',
             editable: true,
@@ -29,6 +42,14 @@ function Categories() {
             title: '文章数量',
             dataIndex: 'articleNum',
             align: 'center',
+        },
+        {
+            title: '状态',
+            dataIndex: 'status',
+            align: 'center',
+            render: (_,record) => (
+                <Switch onChange={(status) => onStatusChange(status, record)} checkedIcon={<IconCheck />} uncheckedIcon={<IconClose />} checked={record.status} />
+            )
         },
         {
             title: '创建时间',
@@ -46,14 +67,15 @@ function Categories() {
             align: 'center',
             render: (_,record)=>(
                 <div className={styles.operations}>
-                    <Button type="text" size="small">
+                    <Button disabled={record.status} onClick={() => onUpdate(record)} type="text" size="small">
                         修改
                     </Button>
                     <Popconfirm
                         title='确定删除吗?'
                         onOk={() => onDelete(record)}
+                        disabled={record.status}
                     >
-                        <Button type="text" status="danger" size="small">
+                        <Button disabled={record.status} type="text" status="danger" size="small">
                             删除
                         </Button>
                     </Popconfirm>
@@ -62,8 +84,8 @@ function Categories() {
         },
     ]
 
-    const tagsState = useSelector((state: ReducerState)=> state.tags)
-    const { data, pagination, loading, formParams, visible, confirmLoading } = tagsState
+    const categoriesState = useSelector((state: ReducerState)=> state.categories)
+    const { data, pagination, loading, formParams, visible, confirmLoading } = categoriesState
     const dispatch = useDispatch()
 
     const formItemLayout = {
@@ -116,6 +138,7 @@ function Categories() {
                 visible: true
             }
         })
+        setTitle('添加标签')
     }
     const onCancel = () => {
         dispatch({
@@ -129,13 +152,17 @@ function Categories() {
     const onOk = async () => {
         await form.validate()
         const data = form.getFields()
+        let func = create
+        if (data._id){
+            func = update
+        }
         dispatch({
             type: TOGGLE_CONFIRM_LOADING,
             payload: {
                 confirmLoading: true
             }
         })
-        const result:any = await create(data)
+        const result:any = await func(data)
         if (result.code === 0){
             dispatch({
                 type: TOGGLE_CONFIRM_LOADING,
@@ -157,7 +184,16 @@ function Categories() {
             Message.error('修改失败，请重试')
         }
     }
-
+    const onUpdate = (row) => {
+        dispatch({
+            type: TOGGLE_VISIBLE,
+            payload: {
+                visible: true
+            }
+        })
+        setTitle('修改标签')
+        form.setFieldsValue(row)
+    }
     const onDelete = async (row) => {
         const result:any = await remove(row)
         if (result.code === 0){
@@ -166,19 +202,30 @@ function Categories() {
             Message.error('删除失败，请重试')
         }
     }
+    const onStatusChange = async (status:boolean, row) => {
+        const result:any = await updateStatus({
+            id: row._id,
+            status
+        })
+        if (result.code === 0){
+            fetchData().then(Message.success(result.msg))
+        }else{
+            Message.error('修改失败，请重试')
+        }
+    }
 
     return (
         <div className={styles.container}>
             <Card bordered={false}>
                 <div className={styles.toolbar}>
                     <div>
-                        <Button type="primary" onClick={onAdd}>添加分类</Button>
+                        <Button type="primary" onClick={onAdd}>添加标签</Button>
                     </div>
                     <div>
                         <Input.Search
                             style={{width: 300}}
                             searchButton
-                            placeholder="请输入分类名称"
+                            placeholder="请输入标签名称"
                             onSearch={onSearch}
                         />
                     </div>
@@ -188,28 +235,12 @@ function Categories() {
                     loading={loading}
                     onChange={onChangeTable}
                     pagination={pagination}
-                    columns={columns.map((column) =>
-                        column.editable
-                            ? {
-                                ...column,
-                                onCell: () => ({
-                                    onHandleSave,
-                                }),
-                            }
-                            : column
-                    )}
+                    columns={columns}
                     data={data}
-                    components={{
-                        body: {
-                            row: EditableRow,
-                            cell: EditableCell,
-                        },
-                    }}
-                    className={styles['table-demo-editable-cell']}
                 />
                 <Modal
                     title={(
-                        <div style={{textAlign: 'left'}}>添加分类</div>
+                        <div style={{textAlign: 'left'}}>{ title }</div>
                     )}
                     visible={visible}
                     onOk={onOk}
@@ -220,8 +251,8 @@ function Categories() {
                         {...formItemLayout}
                         form={form}
                     >
-                        <Form.Item label='分类名称' field='name' rules={[{ required: true, message: '请输入分类名称' }]}>
-                            <Input placeholder='请输入分类名称' />
+                        <Form.Item label='标签名称' field='name' rules={[{ required: true, message: '请输入标签名称' }]}>
+                            <Input placeholder='请输入标签名称' />
                         </Form.Item>
                     </Form>
                 </Modal>

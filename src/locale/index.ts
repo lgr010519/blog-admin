@@ -2,6 +2,8 @@ const i18n = {
   'en-US': {
     'menu.dashboard': 'Dashboard',
     'menu.categories': 'Categories',
+    'menu.tags': 'Tags',
+    'menu.about': 'About',
     'menu.dashboard.workplace': 'Workplace',
     'menu.user.info': 'User Info',
     'menu.user.setting': 'User Setting',
@@ -42,6 +44,8 @@ const i18n = {
   'zh-CN': {
     'menu.dashboard': '仪表盘',
     'menu.categories': '分类管理',
+    'menu.tags': '标签管理',
+    'menu.about': '关于管理',
     'menu.dashboard.workplace': '工作台',
     'menu.user.info': '用户信息',
     'menu.user.setting': '用户设置',

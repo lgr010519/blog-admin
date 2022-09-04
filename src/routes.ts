@@ -26,6 +26,14 @@ export const routes: IRoute[] = [
     name: 'menu.categories',
     key: 'categories',
   },
+  {
+    name: 'menu.tags',
+    key: 'tags',
+  },
+  {
+    name: 'menu.about',
+    key: 'about',
+  },
 ];
 
 export const getName = (path: string, routes) => {
