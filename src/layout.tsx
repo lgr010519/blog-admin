@@ -8,7 +8,7 @@ import {
   IconMenuFold,
   IconMenuUnfold, IconStorage, IconAttachment, IconMore,
 } from '@arco-design/web-react/icon';
-import { useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import qs from 'query-string';
 import NProgress from 'nprogress';
 import Navbar from './components/NavBar';
@@ -74,7 +74,8 @@ function PageLayout() {
   const pathname = history.location.pathname;
   const currentComponent = qs.parseUrl(pathname).url.slice(1);
   const locale = useLocale();
-  const { settings, userLoading } = useSelector(
+  const dispatch = useDispatch()
+  const { settings, userLoading, collapsed } = useSelector(
     (state: ReducerState) => state.global
   );
   const { userInfo } = useSelector(
@@ -87,7 +88,7 @@ function PageLayout() {
   const defaultOpenKeys = paths.slice(0, paths.length - 1);
 
   const [breadcrumb, setBreadCrumb] = useState([]);
-  const [collapsed, setCollapsed] = useState<boolean>(false);
+  // const [collapsed, setCollapsed] = useState<boolean>(false);
   const [selectedKeys, setSelectedKeys] =
     useState<string[]>(defaultSelectedKeys);
   const [openKeys, setOpenKeys] = useState<string[]>(defaultOpenKeys);
@@ -164,7 +165,10 @@ function PageLayout() {
   }
 
   function toggleCollapse() {
-    setCollapsed((collapsed) => !collapsed);
+    dispatch({
+      type: 'TOGGLE_COLLAPSED',
+      payload: !collapsed
+    })
   }
 
   const paddingLeft = showMenu ? { paddingLeft: menuWidth } : {};
@@ -214,7 +218,7 @@ function PageLayout() {
               className={styles['layout-sider']}
               width={menuWidth}
               collapsed={collapsed}
-              onCollapse={setCollapsed}
+              onCollapse={toggleCollapse}
               trigger={null}
               collapsible
               breakpoint="xl"

@@ -2,10 +2,12 @@ import defaultSettings from '../settings.json';
 export interface GlobalState {
   settings?: typeof defaultSettings;
   userLoading?: boolean;
+  collapsed?: boolean;
 }
 
 const initialState: GlobalState = {
   settings: defaultSettings,
+  collapsed: false,
 };
 
 export default function store(state = initialState, action) {
@@ -25,6 +27,12 @@ export default function store(state = initialState, action) {
     //     userInfo,
     //   };
     // }
+    case 'TOGGLE_COLLAPSED': {
+      return {
+        ...state,
+        collapsed: action.payload
+      }
+    }
     default:
       return state;
   }

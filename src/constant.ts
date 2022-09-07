@@ -13,3 +13,10 @@ export const colors = [
     'magenta',
     'gray',
 ];
+
+export const imagesType = [
+    'image/jpg',
+    'image/png',
+    'image/jpeg',
+    "image/gif",
+]
