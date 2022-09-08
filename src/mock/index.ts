@@ -6,6 +6,8 @@ import './message-box';
 import '@/pages/categories/mock'
 import '@/pages/tags/mock'
 import '@/pages/about/mock'
+import '@/pages/user/mock'
+import '@/pages/comment/mock'
 
 if (!isSSR) {
   Mock.setup({

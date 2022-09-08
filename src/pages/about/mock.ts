@@ -1,11 +1,10 @@
 import Mock from 'mockjs'
 import setupMock from "@/utils/setupMock";
-import qs from "query-string";
 
 const data = {
     tags: ['vue','react','nodejs'],
     createTime: 12345678,
-    updateTime: 87654321,
+    updateTime: 8765432111,
     showResume: false,
     _id: '5139857394085723',
     desc: '应届生一枚',

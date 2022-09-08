@@ -4,10 +4,11 @@ import {Button, Card, Link} from "@arco-design/web-react";
 import {IconClockCircle, IconDoubleLeft, IconRefresh, IconSave} from "@arco-design/web-react/icon";
 import {useSelector} from "react-redux";
 import {ReducerState} from "@/redux";
+import dayjs from "dayjs";
 
 const Save = (props) => {
     const { time, showBack, onBack, onRefresh, onSave } = props
-    const message = time ? `上次保存时间：${time}` : '暂无操作'
+    const message = time ? `上次保存时间：${dayjs(time * 1000).format('YYYY-MM-DD HH:mm:ss')}` : '暂无操作'
     const goBack = () => {
         history.go(-1)
     }

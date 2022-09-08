@@ -14,6 +14,7 @@ import {
 import {getList,create,update,remove} from "@/api/categories";
 import {ReducerState} from "@/redux";
 import {EditableCell, EditableRow} from "@/pages/categories/edit";
+import {CategoriesState} from "@/pages/categories/redux/reducer";
 
 function Categories() {
     const locale = useLocale()
@@ -62,8 +63,8 @@ function Categories() {
         },
     ]
 
-    const tagsState = useSelector((state: ReducerState)=> state.tags)
-    const { data, pagination, loading, formParams, visible, confirmLoading } = tagsState
+    const CategoriesState = useSelector((state: ReducerState)=> state.categories)
+    const { data, pagination, loading, formParams, visible, confirmLoading } = CategoriesState
     const dispatch = useDispatch()
 
     const formItemLayout = {

@@ -1,27 +1,50 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import styles from './style/index.module.less'
-import {Button, Card, Form, Grid, Input, Switch} from "@arco-design/web-react";
+import {Button, Card, Form, Grid, Input, Message, Switch} from "@arco-design/web-react";
 import BlogTags from './components/tags'
 import Save from "@/components/Save";
 import UploadImage from '@/components/UploadImage'
-import {queryAbout} from "@/api/about";
+import {addAbout, queryAbout, updateAbout} from "@/api/about";
 
 const About = () => {
     const [form] = Form.useForm()
+    const [time, setTime] = useState()
 
     const onRefresh = () => {
-        console.log(123)
+        loadData(true)
     }
 
     const onSave = async () => {
         await form.validate()
         const values = await form.getFields()
         console.log(values)
+        values.imgs = values.imgs?.map(item => {
+            return {
+                _id: item._id,
+                imgUrl: item.imgUrl,
+                link: item.link
+            }
+        })
+        const func = values._id ? updateAbout : addAbout
+        const result:any = await func(values)
+        if (result.data){
+            loadData()
+            Message.success(result.msg)
+        }else {
+            Message.error('修改失败，请重试')
+        }
     }
 
-    const loadData = async () => {
+    const loadData = async (isRefresh?:boolean) => {
         const result:any = await queryAbout()
+        if (isRefresh){
+            Message.success('刷新成功')
+        }
         console.log('result',result)
+        const data = result.data
+        if (!data) return
+        form.setFieldsValue(data)
+        setTime(data.updateTime)
     }
 
     useEffect(() => {
@@ -60,7 +83,7 @@ const About = () => {
                     </Form>
                 </Card>
             </div>
-            <Save time="2022-09-06" onRefresh={onRefresh} onSave={onSave}/>
+            <Save time={time} onRefresh={onRefresh} onSave={onSave}/>
         </>
     )
 }

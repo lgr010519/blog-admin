@@ -34,6 +34,14 @@ export const routes: IRoute[] = [
     name: 'menu.about',
     key: 'about',
   },
+  {
+    name: 'menu.user',
+    key: 'user',
+  },
+  {
+    name: 'menu.comment',
+    key: 'comment',
+  },
 ];
 
 export const getName = (path: string, routes) => {
