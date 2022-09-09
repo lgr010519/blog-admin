@@ -42,6 +42,20 @@ export const routes: IRoute[] = [
     name: 'menu.comment',
     key: 'comment',
   },
+  {
+    name: 'menu.site',
+    key: 'site',
+    children: [
+      {
+        name: 'menu.homeSite',
+        key: 'site/home',
+      },
+      {
+        name: 'menu.headerFooter',
+        key: 'site/headerFooter',
+      },
+    ]
+  },
 ];
 
 export const getName = (path: string, routes) => {

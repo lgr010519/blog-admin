@@ -7,8 +7,8 @@ import {
     Form,
     Image,
     Input,
-    Message,
-    Popconfirm, Select,
+    Message, Modal,
+    Popconfirm, Radio, Select,
     Table, Tag, Tooltip
 } from "@arco-design/web-react";
 import styles from './style/index.module.less'
@@ -19,7 +19,7 @@ import {
     UPDATE_LOADING,
     UPDATE_PAGINATION
 } from './redux/actionTypes'
-import {getList, remove} from "@/api/comment";
+import {getList, remove, updateCommentStatus} from "@/api/comment";
 import {ReducerState} from "@/redux";
 import {auditStatusOptions} from "@/constant";
 import dayjs from "dayjs";
@@ -30,6 +30,10 @@ function Categories() {
         articleTitle: '',
         auditStatus: 0
     })
+    const [form] = Form.useForm()
+    const [visible, setVisible] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    const [id, setId] = useState('')
 
     const columns:any = [
         {
@@ -104,7 +108,7 @@ function Categories() {
                             删除
                         </Button>
                     </Popconfirm>
-                    <Button type="text" status="success" size="small">审核</Button>
+                    <Button onClick={() => handleAudit(record)} type="text" status="success" size="small">审核</Button>
                 </div>
             )
         },
@@ -115,8 +119,8 @@ function Categories() {
     const dispatch = useDispatch()
 
     useEffect(()=>{
-        fetchData()
-    },[])
+        fetchData(1, pagination.pageSize, query)
+    },[query])
 
     async function fetchData(current = 1, pageSize = 20, params = {}) {
         dispatch({type: UPDATE_LOADING, payload: {loading: true}})
@@ -147,7 +151,6 @@ function Categories() {
             ...query,
             articleTitle
         })
-        fetchData(1, pagination.pageSize, { ...query })
     }
 
     const onDelete = async (row) => {
@@ -164,7 +167,37 @@ function Categories() {
             ...query,
             auditStatus
         })
-        fetchData(1, pagination.pageSize, { ...query })
+    }
+
+    const handleAudit = (row) => {
+        setVisible(true)
+        setId(row._id)
+    }
+
+    const onOk = async () => {
+        await form.validate()
+        setConfirmLoading(true)
+        const values = await form.getFields()
+        console.log(values)
+        const postData = {
+            id,
+            ...values
+        }
+        const result:any = await updateCommentStatus(postData)
+        if (result.code === 0){
+            Message.success(result.msg)
+            fetchData()
+            setConfirmLoading(false)
+            onCancel()
+        }else {
+            Message.error('审核失败，请重试')
+        }
+    }
+
+    const onCancel = () => {
+        setVisible(false)
+        form.resetFields()
+        setId('')
     }
 
     return (
@@ -179,8 +212,9 @@ function Categories() {
                             onSearch={onSearch}
                         />
                         <Select
+                            defaultValue={0}
                             placeholder='请选择审核状态'
-                            style={{ width: 160, marginLeft: 20 }}
+                            style={{ width: 160, marginLeft: 20, marginRight: 20 }}
                             onChange={onSelectSearch}
                         >
                             {auditStatusOptions.map((option) => (
@@ -189,6 +223,7 @@ function Categories() {
                                 </Select.Option>
                             ))}
                         </Select>
+                        <Button type="primary" onClick={() => handleAudit({ _id: 0 })}>一键审核</Button>
                     </div>
                 </div>
                 <Table
@@ -200,6 +235,24 @@ function Categories() {
                     data={data}
                     scroll={{x: 1600}}
                 />
+                <Modal
+                    title='审核'
+                    visible={visible}
+                    onOk={onOk}
+                    confirmLoading={confirmLoading}
+                    onCancel={onCancel}
+                >
+                    <Form
+                        form={form}
+                    >
+                        <Form.Item label='审核状态' field='auditStatus' rules={[{ required: true, message: '请选择审核状态' }]}>
+                            <Radio.Group>
+                                <Radio value={1}>通过</Radio>
+                                <Radio value={2}>驳回</Radio>
+                            </Radio.Group>
+                        </Form.Item>
+                    </Form>
+                </Modal>
             </Card>
         </div>
     )

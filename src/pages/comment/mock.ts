@@ -92,6 +92,23 @@ setupMock({
                         list: data.list.slice((p - 1) * ps, p * ps),
                         totalCount: 55,
                     }
+                case 'PUT':
+                    const body = JSON.parse(params.body)
+                    if (body.id === 0){
+                        data.list.map(item => {
+                            item.auditStatus = body.auditStatus
+                            return item
+                        })
+                    }else {
+                        const index = data.list.findIndex(item => item._id === body.id)
+                        data.list[index] = {...data.list[index], ...body}
+                    }
+
+                    return {
+                        code: 0,
+                        data: null,
+                        msg: '审核成功'
+                    }
                 case 'DELETE':
                     const delBody = JSON.parse(params.body)
                     const idx = data.list.findIndex(item => item._id === delBody._id)

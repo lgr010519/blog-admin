@@ -8,6 +8,14 @@ export function getList(params){
     })
 }
 
+export function updateCommentStatus(data){
+    return request({
+        url: '/comment',
+        method: 'PUT',
+        data,
+    })
+}
+
 export function remove(data){
     return request({
         url: '/comment',
