@@ -3,7 +3,7 @@ import styles from './style/index.module.less'
 import {Button, Card, Form, Grid, Input, Message, Radio, Switch} from "@arco-design/web-react";
 import Save from "@/components/Save";
 import UploadImage from '@/components/UploadImage'
-import {addHome, queryHome, updateHome} from "@/api/site/home";
+import {addHeaderFooter, queryHeaderFooter, updateHeaderFooter} from "@/api/site/headerFooter";
 
 const HeaderFooter = () => {
     const [form] = Form.useForm()
@@ -18,17 +18,13 @@ const HeaderFooter = () => {
         await form.validate()
         const values = await form.getFields()
         console.log(values)
-        const postData = {
-            ...values,
-            archiveBgImg: values.archiveBgImg[0].imgUrl,
-            categoriesBgImg: values.categoriesBgImg[0].imgUrl,
-            categoriesDetailBgImg: values.categoriesDetailBgImg[0].imgUrl,
-            tagsBgImg: values.tagsBgImg[0].imgUrl,
-            tagsDetailBgImg: values.tagsDetailBgImg[0].imgUrl,
-            aboutBgImg: values.aboutBgImg[0].imgUrl,
+        const postData = values
+        if (type === 1) {
+            postData.header.logo = postData.header.logo[0].imgUrl
         }
-        const func = values._id ? updateHome : addHome
+        const func = values._id ? updateHeaderFooter : addHeaderFooter
         const result: any = await func(postData)
+        console.log('post', result)
         if (result.data) {
             loadData()
             Message.success(result.msg)
@@ -38,19 +34,36 @@ const HeaderFooter = () => {
     }
 
     const loadData = async (isRefresh?: boolean) => {
-        const result: any = await queryHome()
+        const result: any = await queryHeaderFooter()
         if (isRefresh) {
             Message.success('刷新成功')
         }
         console.log('result', result)
         const data = result.data
-        if (!data) return
-        if (data.logo){
+        if (!data) {
             form.setFieldsValue({
+                header: {
+                    openSearch: false,
+                    login: false,
+                    register: false
+                }
+            })
+            return
+        }
+        if (data.header.logo) {
+            setType(1)
+            form.setFieldsValue({
+                type: 1,
                 ...data,
                 logo: [{
-                    imgUrl: data.logo
+                    imgUrl: data.header.logo
                 }],
+            })
+        } else {
+            setType(2)
+            form.setFieldsValue({
+                ...data,
+                type: 2
             })
         }
         setTime(data.updateTime)
@@ -85,11 +98,11 @@ const HeaderFooter = () => {
                                 </Form.Item>
                             </Grid.Col>
                             <Grid.Col span={12} offset={2}>
-                                <Form.Item label="Logo" layout="inline" field="header.type"
-                                           triggerPropName="checked" rules={[{required: true, message: '请选择Logo'}]}>
+                                <Form.Item label="Logo" layout="inline" field="type"
+                                           rules={[{required: true, message: '请选择Logo'}]}>
                                     <Radio.Group onChange={onRadioChange}>
-                                        <Radio value='1'>图片</Radio>
-                                        <Radio value='2'>文本</Radio>
+                                        <Radio value={1}>图片</Radio>
+                                        <Radio value={2}>文本</Radio>
                                     </Radio.Group>
                                 </Form.Item>
                                 {
@@ -116,7 +129,7 @@ const HeaderFooter = () => {
                     </Card>
                     <Card style={{marginTop: 20}} hoverable title="Footer配置">
                         <Form.Item
-                            labelCol={{ span: 3 }}
+                            labelCol={{span: 3}}
                             layout="horizontal"
                             label="Copyright"
                             field="footer.copyright"
@@ -126,7 +139,7 @@ const HeaderFooter = () => {
                             <Input placeholder="请输入Copyright"/>
                         </Form.Item>
                         <Form.Item
-                            labelCol={{ span: 3 }}
+                            labelCol={{span: 3}}
                             layout="horizontal"
                             label="额外信息"
                             labelAlign="right"

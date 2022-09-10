@@ -9,6 +9,8 @@ import '@/pages/about/mock'
 import '@/pages/user/mock'
 import '@/pages/comment/mock'
 import '@/pages/site/home/mock'
+import '@/pages/site/headerFooter/mock'
+import '@/pages/site/right/mock'
 
 if (!isSSR) {
   Mock.setup({

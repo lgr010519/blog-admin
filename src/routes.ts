@@ -54,6 +54,10 @@ export const routes: IRoute[] = [
         name: 'menu.headerFooter',
         key: 'site/headerFooter',
       },
+      {
+        name: 'menu.right',
+        key: 'site/right',
+      },
     ]
   },
 ];
