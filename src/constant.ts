@@ -51,3 +51,40 @@ export const showPositions = [
     '标签详情',
     '关于',
 ]
+
+export const showPositionColorObj = {
+    首页: 'blue',
+    文章: '#87d068',
+    文章详情: '#ccc',
+    归档: '#f50',
+    分类: 'gold',
+    分类详情: 'lime',
+    标签: '#108ee9',
+    标签详情: 'cyan',
+    关于: '#2db7f5',
+}
+
+export const projects = [
+    {
+        key: '1',
+        value: '电影'
+    },
+    {
+        key: '2',
+        value: '电视剧'
+    },
+    {
+        key: '3',
+        value: '音乐'
+    },
+]
+
+export const statusOptions = [
+    {key: '1', value: '启用'},
+    {key: '2', value: '停用'}
+]
+
+export const publishStatusOptions = [
+    {key: '1', value: '已发布'},
+    {key: '2', value: '未发布'}
+]

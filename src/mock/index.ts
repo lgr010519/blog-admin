@@ -11,6 +11,7 @@ import '@/pages/comment/mock'
 import '@/pages/site/home/mock'
 import '@/pages/site/headerFooter/mock'
 import '@/pages/site/right/mock'
+import '@/pages/articles/mock'
 
 if (!isSSR) {
   Mock.setup({

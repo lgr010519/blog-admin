@@ -45,3 +45,35 @@ export function updateAd(data){
         data,
     })
 }
+
+export function getListRecommend(params){
+    return request({
+        url: '/config/right/recommend',
+        method: 'GET',
+        params,
+    })
+}
+
+export function createRecommend(data){
+    return request({
+        url: '/config/right/recommend',
+        method: 'POST',
+        data,
+    })
+}
+
+export function updateRecommend(data){
+    return request({
+        url: '/config/right/recommend',
+        method: 'PUT',
+        data,
+    })
+}
+
+export function removeRecommend(data){
+    return request({
+        url: '/config/right/recommend',
+        method: 'DELETE',
+        data,
+    })
+}

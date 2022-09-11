@@ -6,7 +6,7 @@ import {
   IconDashboard,
   IconTag,
   IconMenuFold,
-  IconMenuUnfold, IconStorage, IconAttachment, IconMore, IconHeart, IconUser, IconMessage, IconSettings,
+  IconMenuUnfold, IconStorage, IconAttachment, IconMore, IconHeart, IconUser, IconMessage, IconSettings, IconBook,
 } from '@arco-design/web-react/icon';
 import {useDispatch, useSelector} from 'react-redux';
 import qs from 'query-string';
@@ -45,6 +45,8 @@ function getIconFromKey(key) {
       return <IconMessage className={styles.icon} />;
     case 'site':
       return <IconSettings className={styles.icon} />;
+    case 'articles':
+      return <IconBook className={styles.icon} />;
     default:
       return <div className={styles['icon-empty']} />;
   }

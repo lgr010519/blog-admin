@@ -27,7 +27,7 @@ import {getList,create,update,remove,updateStatus} from "@/api/tags";
 import {ReducerState} from "@/redux";
 import {IconCheck, IconClose} from "@arco-design/web-react/icon";
 
-function Categories() {
+function Tags() {
     const locale = useLocale()
     const [title, setTitle] = useState('添加标签')
 
@@ -260,4 +260,4 @@ function Categories() {
         </div>
     )
 }
-export default Categories
+export default Tags
