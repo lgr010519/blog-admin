@@ -27,6 +27,11 @@ export const routes: IRoute[] = [
     key: 'articles',
   },
   {
+    name: 'menu.articles.edit',
+    key: 'articles/edit',
+    ignore: true,
+  },
+  {
     name: 'menu.categories',
     key: 'categories',
   },

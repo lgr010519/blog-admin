@@ -8,7 +8,7 @@ import {
     Form, Grid,
     Input,
     Message,
-    Popconfirm,
+    Popconfirm, Radio,
     Select, Switch,
     Table, Tag,
 } from "@arco-design/web-react";
@@ -21,7 +21,7 @@ import {
     UPDATE_LOADING,
     UPDATE_PAGINATION
 } from './redux/actionTypes'
-import {getList, remove, updateStatus, updatePublishStatus} from "@/api/articles";
+import {getList, remove, updateStatus, updatePublishStatus, updateCollectStatus} from "@/api/articles";
 import {getList as getTagsList} from '@/api/tags'
 import {getList as getCategoriesList} from '@/api/categories'
 import {ReducerState} from "@/redux";
@@ -31,7 +31,7 @@ import {
 } from "@/constant";
 import dayjs from "dayjs";
 
-function Articles() {
+function Articles(props) {
     const locale = useLocale()
 
     const onStatusChange = async (checked, record) => {
@@ -62,9 +62,9 @@ function Articles() {
         }
     }
 
-    const onView = (row) => {
+    /*const onView = (row) => {
         console.log(123)
-    }
+    }*/
 
     const columns: any = [
         {
@@ -185,9 +185,9 @@ function Articles() {
                     <Button onClick={() => onChangePublishStatus(record)} type="text" size="small">
                         {record.publishStatus === 1 ? '下线' : '发布'}
                     </Button>
-                    <Button onClick={() => onView(record)} type="text" size="small">
+                    {/*<Button onClick={() => onView(record)} type="text" size="small">
                         查看
-                    </Button>
+                    </Button>*/}
                     {
                         record.publishStatus === 2 && (
                             <>
@@ -256,28 +256,15 @@ function Articles() {
     }
 
     const onAdd = () => {
-        dispatch({
-            type: TOGGLE_VISIBLE,
-            payload: {
-                visible: true
-            }
-        })
+        props.history.push(`/articles/edit`)
     }
     const onUpdate = (row) => {
-        dispatch({
-            type: TOGGLE_VISIBLE,
-            payload: {
-                visible: true
-            }
-        })
-        row.imgs = [{
-            imgUrl: row.cover,
-            link: row.link
-        }]
-        form.setFieldsValue(row)
+        props.history.push(`/articles/edit?id=${row._id}`)
     }
     const onDelete = async (row) => {
-        const result: any = await remove(row)
+        const result: any = await remove({
+            id: row._id
+        })
         if (result.code === 0) {
             fetchData().then(Message.success(result.msg))
         } else {
@@ -345,26 +332,32 @@ function Articles() {
         fetchData()
     }
 
+    const handleUpdateCollectStatus = async (isCollect) => {
+        const result: any = await updateCollectStatus({
+            isCollect
+        })
+        if (result.code === 0) {
+            fetchData().then(Message.success(result.msg))
+        } else {
+            Message.error('一键操作失败，请重试')
+        }
+    }
+
     return (
         <div className={styles.container}>
             <Card bordered={false}>
                 <div className={styles.toolbar}>
                     <div>
                         <Button type="primary" onClick={onAdd}>添加文章</Button>
-                        <Button.Group style={{marginLeft: 20}}>
-                            <Button
-                                status="success"
-                                style={{padding: '0 8px'}}
-                            >
-                                一键开启收藏
-                            </Button>
-                            <Button
-                                status="danger"
-                                style={{padding: '0 8px'}}
-                            >
-                                一键关闭收藏
-                            </Button>
-                        </Button.Group>
+                        <Radio.Group
+                            type='button'
+                            name='lang'
+                            style={{marginLeft: 20}}
+                            onChange={handleUpdateCollectStatus}
+                        >
+                            <Radio value={true}>一键开启收藏</Radio>
+                            <Radio value={false}>一键关闭收藏</Radio>
+                        </Radio.Group>
                     </div>
                 </div>
                 <Form form={form} {...layout} style={{marginBottom: 20}} layout="horizontal" initialValues={{

@@ -64,7 +64,20 @@ const data = {
 setupMock
 ({
     setup() {
-        Mock.mock(new RegExp('/api/v1/articles/status'),(params)=>{
+        Mock.mock(new RegExp('/api/v1/articles/edit'), (params) => {
+            switch (params.type) {
+                case 'GET':
+                    const {id} = qs.parseUrl(params.url).query
+                    const detailData = data.list.filter(item => item._id === id)
+
+                    return {
+                        code: 0,
+                        data: detailData[0],
+                        msg: '文章详情获取成功'
+                    }
+            }
+        })
+        Mock.mock(new RegExp('/api/v1/articles/status'), (params) => {
             switch (params.type) {
                 case 'PUT':
                     const body = JSON.parse(params.body)
@@ -78,7 +91,7 @@ setupMock
                     }
             }
         })
-        Mock.mock(new RegExp('/api/v1/articles/publishStatus'),(params)=>{
+        Mock.mock(new RegExp('/api/v1/articles/publishStatus'), (params) => {
             switch (params.type) {
                 case 'PUT':
                     const body = JSON.parse(params.body)
@@ -89,6 +102,23 @@ setupMock
                         code: 0,
                         data: null,
                         msg: '文章发布状态修改成功'
+                    }
+            }
+        })
+        Mock.mock(new RegExp('/api/v1/articles/collectStatus'), (params) => {
+            switch (params.type) {
+                case 'PUT':
+                    const body = JSON.parse(params.body)
+                    data.list.map(item => {
+                        item.isCollect = body.isCollect
+                        return item
+                    })
+                    console.log('list', data.list)
+
+                    return {
+                        code: 0,
+                        data: null,
+                        msg: '一键操作成功'
                     }
             }
         })
@@ -105,6 +135,7 @@ setupMock
                     }
                 case 'POST':
                     const postBody = JSON.parse(params.body)
+                    data.list.unshift(postBody)
 
                     return {
                         code: 0,
@@ -113,11 +144,23 @@ setupMock
                     }
                 case 'PUT':
                     const body = JSON.parse(params.body)
+                    const index = data.list.findIndex(item => item._id === body.id)
+                    data.list[index] = {...data.list[index], ...body}
 
                     return {
                         code: 0,
                         data: body,
                         msg: '文章修改成功'
+                    }
+                case 'DELETE':
+                    const delBody = JSON.parse(params.body)
+                    const idx = data.list.findIndex(item => item._id === delBody.id)
+                    data.list.splice(idx, 1)
+
+                    return {
+                        code: 0,
+                        data: null,
+                        msg: '文章删除成功'
                     }
             }
         })

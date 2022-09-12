@@ -24,6 +24,14 @@ export function update(data){
     })
 }
 
+export function queryArticles(params){
+    return request({
+        url: `/articles/edit`,
+        method: 'GET',
+        params,
+    })
+}
+
 export function updateStatus(data){
     return request({
         url: '/articles/status',
@@ -44,6 +52,14 @@ export function remove(data){
     return request({
         url: '/articles',
         method: 'DELETE',
+        data,
+    })
+}
+
+export function updateCollectStatus(data){
+    return request({
+        url: '/articles/collectStatus',
+        method: 'PUT',
         data,
     })
 }

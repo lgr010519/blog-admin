@@ -1,13 +1,13 @@
 import React from "react";
 import styles from './index.module.less'
 import {Button, Card, Link} from "@arco-design/web-react";
-import {IconClockCircle, IconDoubleLeft, IconRefresh, IconSave} from "@arco-design/web-react/icon";
+import {IconClockCircle, IconDoubleLeft, IconEdit, IconRefresh, IconSave} from "@arco-design/web-react/icon";
 import {useSelector} from "react-redux";
 import {ReducerState} from "@/redux";
 import dayjs from "dayjs";
 
 const Save = (props) => {
-    const { time, showBack, onBack, onRefresh, onSave } = props
+    const { time, showBack, onBack, onRefresh, onSave, onPublish } = props
     const message = time ? `上次保存时间：${dayjs(time * 1000).format('YYYY-MM-DD HH:mm:ss')}` : '暂无操作'
     const goBack = () => {
         history.go(-1)
@@ -29,6 +29,9 @@ const Save = (props) => {
                 }
                 {
                     onSave && <Button onClick={onSave} className={styles.btn} type="primary" icon={<IconSave />}>保存</Button>
+                }
+                {
+                    onPublish && <Button onClick={onPublish} className={styles.btn} type="primary" icon={<IconEdit />}>发布</Button>
                 }
             </div>
         </Card>
