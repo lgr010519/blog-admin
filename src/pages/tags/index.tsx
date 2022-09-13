@@ -23,7 +23,7 @@ import {
     UPDATE_LOADING,
     UPDATE_PAGINATION
 } from './redux/actionTypes'
-import {getList,create,update,remove,updateStatus} from "@/api/tags";
+import {getList, create, update, remove, updateStatus} from "@/api/tags";
 import {ReducerState} from "@/redux";
 import {IconCheck, IconClose} from "@arco-design/web-react/icon";
 
@@ -31,7 +31,7 @@ function Tags() {
     const locale = useLocale()
     const [title, setTitle] = useState('添加标签')
 
-    const columns:any = [
+    const columns: any = [
         {
             title: '标签名称',
             dataIndex: 'name',
@@ -47,8 +47,9 @@ function Tags() {
             title: '状态',
             dataIndex: 'status',
             align: 'center',
-            render: (_,record) => (
-                <Switch onChange={(status) => onStatusChange(status, record)} checkedIcon={<IconCheck />} uncheckedIcon={<IconClose />} checked={record.status} />
+            render: (_, record) => (
+                <Switch onChange={(status) => onStatusChange(status, record)} checkedIcon={<IconCheck/>}
+                        uncheckedIcon={<IconClose/>} checked={record.status}/>
             )
         },
         {
@@ -65,7 +66,7 @@ function Tags() {
             title: '操作',
             dataIndex: 'operations',
             align: 'center',
-            render: (_,record)=>(
+            render: (_, record) => (
                 <div className={styles.operations}>
                     <Button disabled={record.status} onClick={() => onUpdate(record)} type="text" size="small">
                         修改
@@ -84,8 +85,8 @@ function Tags() {
         },
     ]
 
-    const categoriesState = useSelector((state: ReducerState)=> state.categories)
-    const { data, pagination, loading, formParams, visible, confirmLoading } = categoriesState
+    const categoriesState = useSelector((state: ReducerState) => state.categories)
+    const {data, pagination, loading, formParams, visible, confirmLoading} = categoriesState
     const dispatch = useDispatch()
 
     const formItemLayout = {
@@ -99,36 +100,39 @@ function Tags() {
 
     const [form] = Form.useForm()
 
-    useEffect(()=>{
+    useEffect(() => {
         fetchData()
-    },[])
+    }, [])
 
     async function fetchData(current = 1, pageSize = 20, params = {}) {
         dispatch({type: UPDATE_LOADING, payload: {loading: true}})
         try {
-            const result:any = await getList({
+            const result: any = await getList({
                 page: current,
                 pageSize,
                 ...params,
             })
-            if (result){
-                dispatch({ type: UPDATE_LOADING, payload: { loading: false } })
-                dispatch({ type: UPDATE_LIST, payload: { data: result.list } })
-                dispatch({ type: UPDATE_PAGINATION, payload: { pagination: { ...pagination, current, pageSize, total: result.totalCount } } })
-                dispatch({ type: UPDATE_FORM_PARAMS, payload: { params } })
+            if (result) {
+                dispatch({type: UPDATE_LOADING, payload: {loading: false}})
+                dispatch({type: UPDATE_LIST, payload: {data: result.list}})
+                dispatch({
+                    type: UPDATE_PAGINATION,
+                    payload: {pagination: {...pagination, current, pageSize, total: result.totalCount}}
+                })
+                dispatch({type: UPDATE_FORM_PARAMS, payload: {params}})
             }
-        }catch (e) {
+        } catch (e) {
 
         }
     }
 
     function onChangeTable(pagination) {
-        const { current, pageSize } = pagination
+        const {current, pageSize} = pagination
         fetchData(current, pageSize, formParams)
     }
 
     function onSearch(name) {
-        fetchData(1, pagination.pageSize, { name })
+        fetchData(1, pagination.pageSize, {name})
     }
 
     const onAdd = () => {
@@ -153,7 +157,7 @@ function Tags() {
         await form.validate()
         const data = form.getFields()
         let func = create
-        if (data._id){
+        if (data._id) {
             func = update
         }
         dispatch({
@@ -162,8 +166,8 @@ function Tags() {
                 confirmLoading: true
             }
         })
-        const result:any = await func(data)
-        if (result.code === 0){
+        const result: any = await func(data)
+        if (result.code === 0) {
             dispatch({
                 type: TOGGLE_CONFIRM_LOADING,
                 payload: {
@@ -172,15 +176,15 @@ function Tags() {
             })
             onCancel()
             fetchData().then(Message.success(result.msg))
-        }else{
+        } else {
             Message.success('添加失败，请重试')
         }
     }
     const onHandleSave = async (row) => {
-        const result:any = await update(row)
-        if (result.code === 0){
+        const result: any = await update(row)
+        if (result.code === 0) {
             fetchData().then(Message.success(result.msg))
-        }else{
+        } else {
             Message.error('修改失败，请重试')
         }
     }
@@ -195,21 +199,21 @@ function Tags() {
         form.setFieldsValue(row)
     }
     const onDelete = async (row) => {
-        const result:any = await remove(row)
-        if (result.code === 0){
+        const result: any = await remove(row)
+        if (result.code === 0) {
             fetchData().then(Message.success(result.msg))
-        }else{
+        } else {
             Message.error('删除失败，请重试')
         }
     }
-    const onStatusChange = async (status:boolean, row) => {
-        const result:any = await updateStatus({
+    const onStatusChange = async (status: boolean, row) => {
+        const result: any = await updateStatus({
             id: row._id,
             status
         })
-        if (result.code === 0){
+        if (result.code === 0) {
             fetchData().then(Message.success(result.msg))
-        }else{
+        } else {
             Message.error('修改失败，请重试')
         }
     }
@@ -240,7 +244,7 @@ function Tags() {
                 />
                 <Modal
                     title={(
-                        <div style={{textAlign: 'left'}}>{ title }</div>
+                        <div style={{textAlign: 'left'}}>{title}</div>
                     )}
                     visible={visible}
                     onOk={onOk}
@@ -251,8 +255,8 @@ function Tags() {
                         {...formItemLayout}
                         form={form}
                     >
-                        <Form.Item label='标签名称' field='name' rules={[{ required: true, message: '请输入标签名称' }]}>
-                            <Input placeholder='请输入标签名称' />
+                        <Form.Item label='标签名称' field='name' rules={[{required: true, message: '请输入标签名称'}]}>
+                            <Input placeholder='请输入标签名称'/>
                         </Form.Item>
                     </Form>
                 </Modal>
@@ -260,4 +264,5 @@ function Tags() {
         </div>
     )
 }
+
 export default Tags
