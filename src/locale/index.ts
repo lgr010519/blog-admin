@@ -1,5 +1,6 @@
 const i18n = {
   'en-US': {
+    'menu.home': 'Home',
     'menu.dashboard': 'Dashboard',
     'menu.categories': 'Categories',
     'menu.tags': 'Tags',
@@ -50,6 +51,7 @@ const i18n = {
     'navbar.search.placeholder': 'Please search',
   },
   'zh-CN': {
+    'menu.home': '首页',
     'menu.dashboard': '仪表盘',
     'menu.categories': '分类管理',
     'menu.tags': '标签管理',

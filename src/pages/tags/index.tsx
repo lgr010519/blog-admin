@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import useLocale from "@/utils/useLocale";
 import {
-    Breadcrumb,
     Button,
     Card,
     Form,
@@ -26,6 +25,7 @@ import {
 import {getList, create, update, remove, updateStatus} from "@/api/tags";
 import {ReducerState} from "@/redux";
 import {IconCheck, IconClose} from "@arco-design/web-react/icon";
+import dayjs from "dayjs";
 
 function Tags() {
     const locale = useLocale()
@@ -112,12 +112,22 @@ function Tags() {
                 pageSize,
                 ...params,
             })
-            if (result) {
+            if (result.code === 200) {
+                const handleResult = result
+                // handleResult.data.list.createTime = dayjs(handleResult.data.list.createTime).format('YYYY-MM-DD HH:mm:ss')
+                handleResult.data.list.forEach(item => {
+                    item.createTime = dayjs(item.createTime).format('YYYY-MM-DD HH:mm:ss')
+                    if (item.updateTime) {
+                        item.updateTime = dayjs(item.updateTime).format('YYYY-MM-DD HH:mm:ss')
+                    } else {
+                        item.updateTime = '-'
+                    }
+                })
                 dispatch({type: UPDATE_LOADING, payload: {loading: false}})
-                dispatch({type: UPDATE_LIST, payload: {data: result.list}})
+                dispatch({type: UPDATE_LIST, payload: {data: handleResult.data.list}})
                 dispatch({
                     type: UPDATE_PAGINATION,
-                    payload: {pagination: {...pagination, current, pageSize, total: result.totalCount}}
+                    payload: {pagination: {...pagination, current, pageSize, total: handleResult.data.totalCount}}
                 })
                 dispatch({type: UPDATE_FORM_PARAMS, payload: {params}})
             }
@@ -167,7 +177,7 @@ function Tags() {
             }
         })
         const result: any = await func(data)
-        if (result.code === 0) {
+        if (result.code === 200) {
             dispatch({
                 type: TOGGLE_CONFIRM_LOADING,
                 payload: {
@@ -175,19 +185,21 @@ function Tags() {
                 }
             })
             onCancel()
-            fetchData().then(Message.success(result.msg))
+            Message.success(result.msg)
+            fetchData()
         } else {
-            Message.success('添加失败，请重试')
+            Message.error('添加失败，请重试')
         }
     }
-    const onHandleSave = async (row) => {
-        const result: any = await update(row)
-        if (result.code === 0) {
-            fetchData().then(Message.success(result.msg))
-        } else {
-            Message.error('修改失败，请重试')
-        }
-    }
+    // const onHandleSave = async (row) => {
+    //     const result: any = await update(row)
+    //     if (result.code === 0) {
+    //         Message.success(result.msg)
+    //         fetchData()
+    //     } else {
+    //         Message.error('修改失败，请重试')
+    //     }
+    // }
     const onUpdate = (row) => {
         dispatch({
             type: TOGGLE_VISIBLE,
@@ -200,8 +212,9 @@ function Tags() {
     }
     const onDelete = async (row) => {
         const result: any = await remove(row)
-        if (result.code === 0) {
-            fetchData().then(Message.success(result.msg))
+        if (result.code === 200) {
+            Message.success(result.msg)
+            fetchData()
         } else {
             Message.error('删除失败，请重试')
         }
@@ -211,8 +224,9 @@ function Tags() {
             id: row._id,
             status
         })
-        if (result.code === 0) {
-            fetchData().then(Message.success(result.msg))
+        if (result.code === 200) {
+            Message.success(result.msg)
+            fetchData()
         } else {
             Message.error('修改失败，请重试')
         }

@@ -13,14 +13,8 @@ export type IRoute = AuthParams & {
 
 export const routes: IRoute[] = [
   {
-    name: 'menu.dashboard',
-    key: 'dashboard',
-    children: [
-      {
-        name: 'menu.dashboard.workplace',
-        key: 'dashboard/workplace',
-      },
-    ],
+    name: 'menu.home',
+    key: 'home',
   },
   {
     name: 'menu.articles',

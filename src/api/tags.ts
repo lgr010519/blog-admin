@@ -26,7 +26,7 @@ export function update(data){
 
 export function updateStatus(data){
     return request({
-        url: '/tags/status',
+        url: `/tags/status`,
         method: 'PUT',
         data,
     })

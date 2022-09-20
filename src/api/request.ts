@@ -7,19 +7,20 @@ export const request = (config) => {
     })
 
     // 请求拦截
-    http.interceptors.request.use((config)=>{
-        if (config.method === 'put' || config.method === 'delete'){
-            config.url += config.data._id || config.data.id
+    http.interceptors.request.use((config) => {
+        if (config.method === 'put' || config.method === 'delete') {
+            const id = config.data._id || config.data.id
+            config.url += `/${id}`
         }
         return config
-    },(error)=>{
-        console.log('---error---',error)
+    }, (error) => {
+        console.log('---error---', error)
     })
     // 响应拦截
-    http.interceptors.response.use((res)=>{
+    http.interceptors.response.use((res) => {
         return res.data ? res.data : res
-    },(error)=>{
-        console.log('---error---',error.response)
+    }, (error) => {
+        console.log('---error---', error.response)
     })
 
     return http(config)
