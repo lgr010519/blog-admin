@@ -24,7 +24,7 @@ import {ReducerState} from "@/redux";
 function Categories() {
     const locale = useLocale()
 
-    const columns:any = [
+    const columns: any = [
         {
             title: '昵称',
             dataIndex: 'nickName',
@@ -35,7 +35,7 @@ function Categories() {
             title: '头像',
             dataIndex: 'avatar',
             align: 'center',
-            render: (_,record) => {
+            render: (_, record) => {
                 return (
                     <Image width={50} height={50} src={record.avatar}/>
                 )
@@ -58,7 +58,7 @@ function Categories() {
             dataIndex: 'articleIds',
             align: 'center',
             width: 90,
-            render: (_,record) => {
+            render: (_, record) => {
                 return (
                     <Tag color="orange">{record.articleIds?.length}</Tag>
                 )
@@ -84,7 +84,7 @@ function Categories() {
             title: '操作',
             dataIndex: 'operations',
             align: 'center',
-            render: (_,record)=>(
+            render: (_, record) => (
                 <div className={styles.operations}>
                     <Popconfirm
                         title='确定删除吗?'
@@ -99,47 +99,50 @@ function Categories() {
         },
     ]
 
-    const userState = useSelector((state: ReducerState)=> state.user)
-    const { data, pagination, loading, formParams } = userState
+    const userState = useSelector((state: ReducerState) => state.user)
+    const {data, pagination, loading, formParams} = userState
     const dispatch = useDispatch()
 
-    useEffect(()=>{
+    useEffect(() => {
         fetchData()
-    },[])
+    }, [])
 
     async function fetchData(current = 1, pageSize = 20, params = {}) {
         dispatch({type: UPDATE_LOADING, payload: {loading: true}})
         try {
-            const result:any = await getList({
+            const result: any = await getList({
                 page: current,
                 pageSize,
                 ...params,
             })
-            if (result){
-                dispatch({ type: UPDATE_LOADING, payload: { loading: false } })
-                dispatch({ type: UPDATE_LIST, payload: { data: result.list } })
-                dispatch({ type: UPDATE_PAGINATION, payload: { pagination: { ...pagination, current, pageSize, total: result.totalCount } } })
-                dispatch({ type: UPDATE_FORM_PARAMS, payload: { params } })
+            if (result.code === 200) {
+                dispatch({type: UPDATE_LOADING, payload: {loading: false}})
+                dispatch({type: UPDATE_LIST, payload: {data: result.data.list}})
+                dispatch({
+                    type: UPDATE_PAGINATION,
+                    payload: {pagination: {...pagination, current, pageSize, total: result.data.totalCount}}
+                })
+                dispatch({type: UPDATE_FORM_PARAMS, payload: {params}})
             }
-        }catch (e) {
+        } catch (e) {
 
         }
     }
 
     function onChangeTable(pagination) {
-        const { current, pageSize } = pagination
+        const {current, pageSize} = pagination
         fetchData(current, pageSize, formParams)
     }
 
     function onSearch(nickName) {
-        fetchData(1, pagination.pageSize, { nickName })
+        fetchData(1, pagination.pageSize, {nickName})
     }
 
     const onDelete = async (row) => {
-        const result:any = await remove(row)
-        if (result.code === 0){
+        const result: any = await remove(row)
+        if (result.code === 200) {
             fetchData().then(Message.success(result.msg))
-        }else{
+        } else {
             Message.error('删除失败，请重试')
         }
     }
@@ -169,4 +172,5 @@ function Categories() {
         </div>
     )
 }
+
 export default Categories

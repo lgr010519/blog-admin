@@ -1,5 +1,5 @@
 import axios from "axios";
-import {Message} from "@arco-design/web-react";
+import { Notification } from '@arco-design/web-react';
 
 export const request = (config) => {
     const http = axios.create({
@@ -28,7 +28,10 @@ export const request = (config) => {
         console.log('responseError', error.response)
         if (error.response && error.response.status === 401) {
             window.location.href = '/login'
-            Message.error('登录状态过期，请重新登录')
+            Notification.error({
+                title: '错误',
+                content: '登录状态过期，请重新登录',
+            })
         }
     })
 

@@ -8,7 +8,7 @@ import {addAbout, queryAbout, updateAbout} from "@/api/about";
 
 const About = () => {
     const [form] = Form.useForm()
-    const [time, setTime] = useState()
+    const [time, setTime] = useState(null)
 
     const onRefresh = () => {
         loadData(true)
@@ -20,7 +20,7 @@ const About = () => {
         console.log(values)
         values.imgs = values.imgs?.map(item => {
             return {
-                _id: item._id,
+                // _id: item._id,
                 imgUrl: item.imgUrl,
                 link: item.link
             }
@@ -29,6 +29,7 @@ const About = () => {
         const result:any = await func(values)
         if (result.data){
             loadData()
+            setTime(result.data.updateTime)
             Message.success(result.msg)
         }else {
             Message.error('修改失败，请重试')

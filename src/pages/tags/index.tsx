@@ -114,11 +114,10 @@ function Tags() {
             })
             if (result.code === 200) {
                 const handleResult = result
-                // handleResult.data.list.createTime = dayjs(handleResult.data.list.createTime).format('YYYY-MM-DD HH:mm:ss')
                 handleResult.data.list.forEach(item => {
-                    item.createTime = dayjs(item.createTime).format('YYYY-MM-DD HH:mm:ss')
+                    item.createTime = dayjs(item.createTime * 1000).format('YYYY-MM-DD HH:mm:ss')
                     if (item.updateTime) {
-                        item.updateTime = dayjs(item.updateTime).format('YYYY-MM-DD HH:mm:ss')
+                        item.updateTime = dayjs(item.updateTime * 1000).format('YYYY-MM-DD HH:mm:ss')
                     } else {
                         item.updateTime = '-'
                     }
