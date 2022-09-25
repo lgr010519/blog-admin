@@ -34,7 +34,7 @@ const Tab1 = () => {
             return {
                 imgUrl: item.imgUrl,
                 link: item.link,
-                _id: item._id
+                // _id: item._id
             }
         })
         const func = values._id ? updateAd : addAd

@@ -35,7 +35,7 @@ const Tab0 = () => {
             return {
                 icon: item.icon,
                 link: item.link,
-                _id: item._id
+                // _id: item._id
             }
         })
         const func = values._id ? updateIntroduction : addIntroduction
@@ -54,7 +54,7 @@ const Tab0 = () => {
             page: 1,
             pageSize: 9999
         })
-        setTagsArr(result.list?.map(item => item.name) || [])
+        setTagsArr(result.data.list?.map(item => item.name) || [])
     }
 
     useEffect(() => {

@@ -182,10 +182,10 @@ function Tab2() {
             })
             if (result) {
                 dispatch({type: UPDATE_LOADING, payload: {loading: false}})
-                dispatch({type: UPDATE_LIST, payload: {data: result.list}})
+                dispatch({type: UPDATE_LIST, payload: {data: result.data.list}})
                 dispatch({
                     type: UPDATE_PAGINATION,
-                    payload: {pagination: {...pagination, current, pageSize, total: result.totalCount}}
+                    payload: {pagination: {...pagination, current, pageSize, total: result.data.totalCount}}
                 })
                 dispatch({type: UPDATE_FORM_PARAMS, payload: {params}})
             }
@@ -239,7 +239,7 @@ function Tab2() {
             }
         })
         const result: any = await func(data)
-        if (result.code === 0) {
+        if (result.code === 200) {
             dispatch({
                 type: TOGGLE_CONFIRM_LOADING,
                 payload: {
@@ -268,7 +268,7 @@ function Tab2() {
     }
     const onDelete = async (row) => {
         const result: any = await removeRecommend(row)
-        if (result.code === 0) {
+        if (result.code === 200) {
             fetchData().then(Message.success(result.msg))
         } else {
             Message.error('删除失败，请重试')

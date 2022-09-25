@@ -53,6 +53,7 @@ const Edit = () => {
         const values = await form.getFields()
         values.cover = values.cover[0].imgUrl
         values.publishStatus = publishStatus
+        values.status = 1
         if (id) {
             values.id = id
         }
@@ -77,7 +78,7 @@ const Edit = () => {
             Message.success('刷新成功')
         }
         const data = result.data
-        console.log('data',data)
+        console.log('data', data)
         if (!data) return
         data.cover = [{
             imgUrl: data.cover
@@ -91,7 +92,7 @@ const Edit = () => {
             page: 1,
             pageSize: 9999
         })
-        const list = result.list?.map(item => {
+        const list = result.data.list?.map(item => {
             item.key = item._id
             item.value = item.name
             return item
@@ -104,7 +105,7 @@ const Edit = () => {
             page: 1,
             pageSize: 9999
         })
-        const list = result.list?.map(item => {
+        const list = result.data.list?.map(item => {
             item.key = item._id
             item.value = item.name
             return item
@@ -239,7 +240,7 @@ const Edit = () => {
                     </Form>
                 </Card>
             </div>
-            <Save time={time} showBack onRefresh={id && onRefresh} onSave={()=>onSave(2)} onPublish={onPublish}/>
+            <Save time={time} showBack onRefresh={id && onRefresh} onSave={() => onSave(2)} onPublish={onPublish}/>
         </>
     )
 }

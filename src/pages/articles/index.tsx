@@ -40,7 +40,7 @@ function Articles(props) {
             status: checked ? 1 : 2,
         }
         const result: any = await updateStatus(postData)
-        if (result.code === 0) {
+        if (result.code === 200) {
             Message.success(result.msg)
             fetchData()
         } else {
@@ -54,7 +54,7 @@ function Articles(props) {
             publishStatus: record.publishStatus === 1 ? 2 : 1,
         }
         const result: any = await updatePublishStatus(postData)
-        if (result.code === 0) {
+        if (result.code === 200) {
             Message.success(result.msg)
             fetchData()
         } else {
@@ -234,10 +234,10 @@ function Articles(props) {
             })
             if (result) {
                 dispatch({type: UPDATE_LOADING, payload: {loading: false}})
-                dispatch({type: UPDATE_LIST, payload: {data: result.list}})
+                dispatch({type: UPDATE_LIST, payload: {data: result.data.list}})
                 dispatch({
                     type: UPDATE_PAGINATION,
-                    payload: {pagination: {...pagination, current, pageSize, total: result.totalCount}}
+                    payload: {pagination: {...pagination, current, pageSize, total: result.data.totalCount}}
                 })
                 dispatch({type: UPDATE_FORM_PARAMS, payload: {params}})
             }
@@ -265,7 +265,7 @@ function Articles(props) {
         const result: any = await remove({
             id: row._id
         })
-        if (result.code === 0) {
+        if (result.code === 200) {
             fetchData().then(Message.success(result.msg))
         } else {
             Message.error('删除失败，请重试')
@@ -286,7 +286,7 @@ function Articles(props) {
             page: 1,
             pageSize: 9999
         })
-        const list = result.list?.map(item => {
+        const list = result.data.list?.map(item => {
             item.key = item._id
             item.value = item.name
             return item
@@ -299,7 +299,7 @@ function Articles(props) {
             page: 1,
             pageSize: 9999
         })
-        const list = result.list?.map(item => {
+        const list = result.data.list?.map(item => {
             item.key = item._id
             item.value = item.name
             return item
@@ -336,7 +336,7 @@ function Articles(props) {
         const result: any = await updateCollectStatus({
             isCollect
         })
-        if (result.code === 0) {
+        if (result.code === 200) {
             fetchData().then(Message.success(result.msg))
         } else {
             Message.error('一键操作失败，请重试')
