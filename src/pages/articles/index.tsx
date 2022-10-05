@@ -42,7 +42,7 @@ function Articles(props) {
         const result: any = await updateStatus(postData)
         if (result.code === 200) {
             Message.success(result.msg)
-            fetchData()
+            fetchData(1, 20, {status: 0, publishStatus: 0})
         } else {
             Message.error('修改失败，请重试')
         }
@@ -56,7 +56,7 @@ function Articles(props) {
         const result: any = await updatePublishStatus(postData)
         if (result.code === 200) {
             Message.success(result.msg)
-            fetchData()
+            fetchData(1, 20, {status: 0, publishStatus: 0})
         } else {
             Message.error('修改失败，请重试')
         }
@@ -221,7 +221,7 @@ function Articles(props) {
     useEffect(() => {
         getTags()
         getCategories()
-        fetchData()
+        fetchData(1, 20, {status: 0, publishStatus: 0})
     }, [])
 
     async function fetchData(current = 1, pageSize = 20, params = {}) {
@@ -266,7 +266,8 @@ function Articles(props) {
             id: row._id
         })
         if (result.code === 200) {
-            fetchData().then(Message.success(result.msg))
+            fetchData(1, 20, {status: 0, publishStatus: 0})
+            Message.success(result.msg)
         } else {
             Message.error('删除失败，请重试')
         }
@@ -329,7 +330,7 @@ function Articles(props) {
 
     const onReset = () => {
         form.resetFields()
-        fetchData()
+        fetchData(1, 20, {status: 0, publishStatus: 0})
     }
 
     const handleUpdateCollectStatus = async (isCollect) => {
@@ -337,7 +338,8 @@ function Articles(props) {
             isCollect
         })
         if (result.code === 200) {
-            fetchData().then(Message.success(result.msg))
+            fetchData(1, 20, {status: 0, publishStatus: 0})
+            Message.success(result.msg)
         } else {
             Message.error('一键操作失败，请重试')
         }
@@ -373,12 +375,11 @@ function Articles(props) {
                         </Grid.Col>
                         <Grid.Col span={6}>
                             <Form.Item field="categories" label="分类">
-                                <Select placeholder="请选择分类"
-                                        defaultValue="">
+                                <Select placeholder="请选择分类">
                                     {
-                                        [{key: '', value: '全部'}, ...categoriesArr].map(item => <Select.Option
+                                        categoriesArr.map(item => <Select.Option
                                             key={item.key}
-                                            value={item.key}>{item.value}</Select.Option>)
+                                            value={item.value}>{item.value}</Select.Option>)
                                     }
                                 </Select>
                             </Form.Item>
@@ -389,7 +390,7 @@ function Articles(props) {
                                         mode="multiple">
                                     {
                                         tagsArr.map(item => <Select.Option key={item.key}
-                                                                           value={item.key}>{item.value}</Select.Option>)
+                                                                           value={item.value}>{item.value}</Select.Option>)
                                     }
                                 </Select>
                             </Form.Item>

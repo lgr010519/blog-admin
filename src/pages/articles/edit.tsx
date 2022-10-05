@@ -59,7 +59,7 @@ const Edit = () => {
         }
         const func = id ? update : create
         const result: any = await func(values)
-        if (result.data) {
+        if (result.code === 200) {
             history.go(-1)
             Message.success(result.msg)
         } else {

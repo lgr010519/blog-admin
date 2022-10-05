@@ -1,6 +1,6 @@
 import {request} from "@/api/request";
 
-export function getList(params){
+export function getList(params) {
     return request({
         url: '/articles',
         method: 'GET',
@@ -8,7 +8,7 @@ export function getList(params){
     })
 }
 
-export function create(data){
+export function create(data) {
     return request({
         url: '/articles',
         method: 'POST',
@@ -16,7 +16,7 @@ export function create(data){
     })
 }
 
-export function update(data){
+export function update(data) {
     return request({
         url: '/articles',
         method: 'PUT',
@@ -24,15 +24,14 @@ export function update(data){
     })
 }
 
-export function queryArticles(params){
+export function queryArticles(params) {
     return request({
-        url: `/articles/edit`,
+        url: `/articles/${params.id}/edit`,
         method: 'GET',
-        params,
     })
 }
 
-export function updateStatus(data){
+export function updateStatus(data) {
     return request({
         url: '/articles/status',
         method: 'PUT',
@@ -40,7 +39,7 @@ export function updateStatus(data){
     })
 }
 
-export function updatePublishStatus(data){
+export function updatePublishStatus(data) {
     return request({
         url: '/articles/publishStatus',
         method: 'PUT',
@@ -48,7 +47,7 @@ export function updatePublishStatus(data){
     })
 }
 
-export function remove(data){
+export function remove(data) {
     return request({
         url: '/articles',
         method: 'DELETE',
@@ -56,10 +55,10 @@ export function remove(data){
     })
 }
 
-export function updateCollectStatus(data){
+export function updateCollectStatus(data) {
     return request({
         url: '/articles/collectStatus',
-        method: 'PUT',
+        method: 'POST',
         data,
     })
 }

@@ -100,6 +100,7 @@ function Categories() {
             fixed: 'right',
             render: (_,record) => (
                 <div className={styles.operations}>
+                    <Button onClick={() => handleAudit(record)} type="text" status="success" size="small">审核</Button>
                     <Popconfirm
                         title='确定删除吗?'
                         onOk={() => onDelete(record)}
@@ -108,7 +109,6 @@ function Categories() {
                             删除
                         </Button>
                     </Popconfirm>
-                    <Button onClick={() => handleAudit(record)} type="text" status="success" size="small">审核</Button>
                 </div>
             )
         },
@@ -132,8 +132,8 @@ function Categories() {
             })
             if (result){
                 dispatch({ type: UPDATE_LOADING, payload: { loading: false } })
-                dispatch({ type: UPDATE_LIST, payload: { data: result.list } })
-                dispatch({ type: UPDATE_PAGINATION, payload: { pagination: { ...pagination, current, pageSize, total: result.totalCount } } })
+                dispatch({ type: UPDATE_LIST, payload: { data: result.data.list } })
+                dispatch({ type: UPDATE_PAGINATION, payload: { pagination: { ...pagination, current, pageSize, total: result.data.totalCount } } })
                 dispatch({ type: UPDATE_FORM_PARAMS, payload: { params } })
             }
         }catch (e) {
@@ -155,8 +155,9 @@ function Categories() {
 
     const onDelete = async (row) => {
         const result:any = await remove(row)
-        if (result.code === 0){
-            fetchData().then(Message.success(result.msg))
+        if (result.code === 200){
+            fetchData()
+            Message.success(result.msg)
         }else{
             Message.error('删除失败，请重试')
         }
@@ -184,7 +185,7 @@ function Categories() {
             ...values
         }
         const result:any = await updateCommentStatus(postData)
-        if (result.code === 0){
+        if (result.code === 200){
             Message.success(result.msg)
             fetchData()
             setConfirmLoading(false)
