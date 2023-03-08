@@ -24,6 +24,10 @@ function Categories() {
       dataIndex: 'name',
       align: 'center',
       editable: true,
+      fixed: 'left',
+      render: (_, record) => (
+        <span style={{fontSize: 18}}>{_}</span>
+      )
     },
     {
       title: '文章数量',
@@ -44,6 +48,7 @@ function Categories() {
       title: '操作',
       dataIndex: 'operations',
       align: 'center',
+      fixed: 'right',
       render: (_, record) => (
         <div className={styles.operations}>
           <Button type="text" size="small" onClick={() => onAdd('update',record)}>
@@ -231,7 +236,10 @@ function Categories() {
           pagination={pagination}
           columns={columns}
           data={data}
-          className={styles['table-demo-editable-cell']}
+          scroll={{
+            x: 1000,
+            y: 400,
+          }}
         />
         <Modal
           title={(

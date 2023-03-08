@@ -15,7 +15,6 @@ const Tab1 = () => {
         if (isRefresh) {
             Message.success('刷新成功')
         }
-        console.log('result', result)
         const data = result.data
         form.setFieldsValue(data)
         setTime(data.updateTime)
@@ -28,7 +27,6 @@ const Tab1 = () => {
     const onSave = async () => {
         await form.validate()
         const values = await form.getFields()
-        console.log(values)
         const postData = values
         postData.imgs = postData.imgs.map(item => {
             return {
@@ -39,7 +37,6 @@ const Tab1 = () => {
         })
         const func = values._id ? updateAd : addAd
         const result: any = await func(postData)
-        console.log('post', result)
         if (result.data) {
             loadData()
             Message.success(result.msg)

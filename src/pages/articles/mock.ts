@@ -113,7 +113,6 @@ setupMock
                         item.isCollect = body.isCollect
                         return item
                     })
-                    console.log('list', data.list)
 
                     return {
                         code: 0,

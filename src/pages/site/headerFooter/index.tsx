@@ -17,14 +17,12 @@ const HeaderFooter = () => {
     const onSave = async () => {
         await form.validate()
         const values = await form.getFields()
-        console.log(values)
         const postData = values
         if (type === 1) {
             postData.header.logo = postData.header.logo[0].imgUrl
         }
         const func = values._id ? updateHeaderFooter : addHeaderFooter
         const result: any = await func(postData)
-        console.log('post', result)
         if (result.data) {
             loadData()
             Message.success(result.msg)
@@ -38,7 +36,6 @@ const HeaderFooter = () => {
         if (isRefresh) {
             Message.success('刷新成功')
         }
-        console.log('result', result)
         const data = result.data
         if (!data) {
             form.setFieldsValue({

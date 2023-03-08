@@ -53,7 +53,7 @@ function Index() {
 
   useEffect(() => {
     if (checkLogin()) {
-      fetchUserInfo();
+      // fetchUserInfo();
     } else if (window.location.pathname.replace(/\//g, '') !== 'login') {
       window.location.pathname = '/login';
     }

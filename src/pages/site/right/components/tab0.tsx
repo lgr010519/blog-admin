@@ -16,7 +16,6 @@ const Tab0 = () => {
         if (isRefresh) {
             Message.success('刷新成功')
         }
-        console.log('result', result)
         const data = result.data
         form.setFieldsValue(data)
         setTime(data.updateTime)
@@ -29,7 +28,6 @@ const Tab0 = () => {
     const onSave = async () => {
         await form.validate()
         const values = await form.getFields()
-        console.log(values)
         const postData = values
         postData.friendLink = postData.friendLink.map(item => {
             return {
@@ -40,7 +38,6 @@ const Tab0 = () => {
         })
         const func = values._id ? updateIntroduction : addIntroduction
         const result: any = await func(postData)
-        console.log('post', result)
         if (result.data) {
             loadData()
             Message.success(result.msg)

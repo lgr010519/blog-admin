@@ -17,7 +17,6 @@ const About = () => {
     const onSave = async () => {
         await form.validate()
         const values = await form.getFields()
-        console.log(values)
         values.imgs = values.imgs?.map(item => {
             return {
                 // _id: item._id,
@@ -41,7 +40,6 @@ const About = () => {
         if (isRefresh){
             Message.success('刷新成功')
         }
-        console.log('result',result)
         const data = result.data
         if (!data) return
         form.setFieldsValue(data)

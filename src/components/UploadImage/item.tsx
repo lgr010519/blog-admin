@@ -50,7 +50,6 @@ const Item = (props) => {
     }
 
     const beforeUpload = async (file) => {
-        console.log(file)
         const isImage = imagesType.includes(file.type)
         if (!isImage) {
             return Message.warning('请上传jpg、png、jpeg或gif格式的图片')
