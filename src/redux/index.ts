@@ -7,6 +7,7 @@ import user, {UserState} from "@/pages/user/redux/reducer"
 import comment, {CommentState} from "@/pages/comment/redux/reducer"
 import recommend, {RecommendState} from "@/pages/site/right/components/redux/reducer"
 import articles, {ArticlesState} from "@/pages/articles/redux/reducer"
+import home, {HomeState} from "@/pages/home/redux/reducer"
 
 export interface ReducerState {
     global: GlobalState
@@ -17,6 +18,7 @@ export interface ReducerState {
     comment: CommentState
     recommend: RecommendState
     articles:ArticlesState
+    home: HomeState
 }
 
 export default combineReducers({
@@ -28,4 +30,5 @@ export default combineReducers({
     comment,
     recommend,
     articles,
+    home,
 })
