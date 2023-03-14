@@ -14,6 +14,7 @@ export interface HomeState {
   userNum: Array<{
     _id: string,
     nickName: string,
+    identity: string,
   }>,
   articleNumByCategories: Array<{
     name: string,

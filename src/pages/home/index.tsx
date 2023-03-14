@@ -19,15 +19,6 @@ const Home = () => {
   const {userNum, articleNumByCategories, articleNumByTags} = HomeState
   const dispatch = useDispatch()
 
-  const cols = {
-    percent: {
-      formatter: val => {
-        val = val * 100 + '%';
-        return val;
-      },
-    },
-  };
-
   const data = [
     {month: "2022-12-15", acc: 12},
     {month: "2023-01-01", acc: 18},
@@ -87,7 +78,7 @@ const Home = () => {
                   key={item._id}
                   className={styles.boxItem}>
                   <span className={styles.boxItemSpan}>{item.nickName}</span><br/>
-                  超级管理员
+                  {item.identity || '普通用户'}
                 </div>
               ))}
             </div>
@@ -121,7 +112,7 @@ const Home = () => {
       <Row gutter={14} style={{marginTop: 14}}>
         <Col span={12}>
           <Card title="文章分类占比统计">
-            <Chart height={250} data={articleNumByCategories} scale={cols} autoFit>
+            <Chart height={250} data={articleNumByCategories} autoFit>
               <Legend position={"right"}/>
               <Coordinate type="theta" radius={0.75}/>
               <Interval
@@ -148,7 +139,7 @@ const Home = () => {
         </Col>
         <Col span={12}>
           <Card title="文章标签占比统计">
-            <Chart height={250} data={articleNumByTags} scale={cols} autoFit>
+            <Chart height={250} data={articleNumByTags} autoFit>
               <Legend position={"right"}/>
               <Coordinate type="theta" radius={0.75}/>
               <Interval
