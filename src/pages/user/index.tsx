@@ -76,7 +76,7 @@ function Categories() {
       align: 'center',
       render: (text) => {
         return (
-          <Tooltip content={text} position="tl">{text}</Tooltip>
+          <Tooltip content={text} position="tl">{text || '-'}</Tooltip>
         )
       }
     },

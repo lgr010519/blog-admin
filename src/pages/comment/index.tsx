@@ -41,7 +41,7 @@ function Categories() {
       dataIndex: 'articleTitle',
       align: 'center',
       fixed: 'left',
-      width: 100,
+      width: 180,
       render: (_, record) => (
         <span style={{fontSize: 18}}>{_}</span>
       )
