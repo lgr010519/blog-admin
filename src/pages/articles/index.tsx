@@ -46,7 +46,7 @@ function Articles(props) {
     const result: any = await updateStatus(postData)
     if (result.code === 200) {
       Message.success(result.msg)
-      fetchData(1, 20, {status: 0, publishStatus: 0})
+      fetchData(1, 6, {status: 0, publishStatus: 0})
     } else {
       Message.error('修改失败，请重试')
     }
@@ -60,7 +60,7 @@ function Articles(props) {
     const result: any = await updatePublishStatus(postData)
     if (result.code === 200) {
       Message.success(result.msg)
-      fetchData(1, 20, {status: 0, publishStatus: 0})
+      fetchData(1, 6, {status: 0, publishStatus: 0})
     } else {
       Message.error('修改失败，请重试')
     }
@@ -71,7 +71,6 @@ function Articles(props) {
       title: '文章标题',
       dataIndex: 'title',
       align: 'center',
-      width: 160,
       fixed: 'left',
       render: (_, record) => (
         <span style={{fontSize: 18}}>{_}</span>
@@ -91,13 +90,12 @@ function Articles(props) {
       title: '简介',
       dataIndex: 'introduction',
       align: 'center',
-      width: 160,
+      width: 300,
     },
     {
       title: '分类',
       dataIndex: 'categories',
       align: 'center',
-      width: 70,
     },
     {
       title: '标签',
@@ -123,17 +121,14 @@ function Articles(props) {
       title: '查看/评论/点赞/收藏',
       dataIndex: 'views',
       align: 'center',
-      width: 110,
       render: (_, record) => {
-
-        return `${record.views}/${record.comment}/${record.like}/${record.collect}`
+        return `${record.views} / ${record.comment} / ${record.like} / ${record.collect}`
       }
     },
     {
       title: '文章状态',
       dataIndex: 'status',
       align: 'center',
-      width: 100,
       render: (_, record) => (
         <Switch onChange={(checked) => onStatusChange(checked, record)} checkedText="启用" uncheckedText="停用"
                 checkedIcon={<IconCheck/>} uncheckedIcon={<IconClose/>} checked={record.status === 1}/>
@@ -143,7 +138,6 @@ function Articles(props) {
       title: '发布状态',
       dataIndex: 'publishStatus',
       align: 'center',
-      width: 100,
       render: (text, record) => {
         const texts = {
           1: '已发布',
@@ -162,7 +156,6 @@ function Articles(props) {
       title: '创建时间',
       dataIndex: 'createTime',
       align: 'center',
-      width: 110,
       render: (_, record) => (
         dayjs(record.createTime * 1000).format('YYYY-MM-DD HH:mm:ss')
       )
@@ -171,7 +164,6 @@ function Articles(props) {
       title: '修改时间',
       dataIndex: 'updateTime',
       align: 'center',
-      width: 110,
       render: (_, record) => (
         record.updateTime ? dayjs(record.updateTime * 1000).format('YYYY-MM-DD HH:mm:ss') : '-'
       )
@@ -181,15 +173,12 @@ function Articles(props) {
       dataIndex: 'operations',
       align: 'center',
       fixed: 'right',
-      width: 240,
+      width: 200,
       render: (_, record) => (
         <div className={styles.operations}>
           <Button onClick={() => onChangePublishStatus(record)} type="text" size="small">
             {record.publishStatus === 1 ? '下线' : '发布'}
           </Button>
-          {/*<Button onClick={() => onView(record)} type="text" size="small">
-                        查看
-                    </Button>*/}
           {
             record.publishStatus === 2 && (
               <>
@@ -223,10 +212,10 @@ function Articles(props) {
   useEffect(() => {
     getTags()
     getCategories()
-    fetchData(1, 20, {status: 0, publishStatus: 0})
+    fetchData(1, 6, {status: 0, publishStatus: 0})
   }, [])
 
-  async function fetchData(current = 1, pageSize = 20, params = {}) {
+  async function fetchData(current = 1, pageSize = 6, params = {}) {
     dispatch({type: UPDATE_LOADING, payload: {loading: true}})
     try {
       const result: any = await getList({
@@ -268,7 +257,7 @@ function Articles(props) {
       id: row._id
     })
     if (result.code === 200) {
-      fetchData(1, 20, {status: 0, publishStatus: 0})
+      fetchData(1, 6, {status: 0, publishStatus: 0})
       Message.success(result.msg)
     } else {
       Message.error('删除失败，请重试')
@@ -334,7 +323,7 @@ function Articles(props) {
 
   const onReset = () => {
     form.resetFields()
-    fetchData(1, 20, {status: 0, publishStatus: 0})
+    fetchData(1, 6, {status: 0, publishStatus: 0})
   }
 
   const handleUpdateCollectStatus = async (isCollect) => {
@@ -342,7 +331,7 @@ function Articles(props) {
       isCollect
     })
     if (result.code === 200) {
-      fetchData(1, 20, {status: 0, publishStatus: 0})
+      fetchData(1, 6, {status: 0, publishStatus: 0})
       Message.success(result.msg)
     } else {
       Message.error('一键操作失败，请重试')
@@ -457,8 +446,7 @@ function Articles(props) {
           columns={columns}
           data={data}
           scroll={{
-            x: 1400,
-            y: 400,
+            x: 2000,
           }}
         />
       </Card>

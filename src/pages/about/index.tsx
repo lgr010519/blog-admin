@@ -55,7 +55,7 @@ const About = () => {
             <div className={styles.container}>
                 <Card hoverable>
                     <Form form={form} layout="vertical">
-                        <Grid.Row className='grid-demo' style={{ marginBottom: 16 }}>
+                        <Grid.Row className='grid-demo'>
                             <Grid.Col span={10}>
                                 <Form.Item label="标签云：(1-20个)" field="tags" rules={[{ required: true, message: '请添加标签' }]}>
                                     <BlogTags max={20}/>
@@ -68,9 +68,6 @@ const About = () => {
                                     ]}
                                 >
                                     <Input.TextArea rows={5} maxLength={800} showWordLimit/>
-                                </Form.Item>
-                                <Form.Item label="个人简历" layout="inline" field="showResume" triggerPropName="checked">
-                                    <Switch checkedText="显示" uncheckedText="隐藏"/>
                                 </Form.Item>
                             </Grid.Col>
                             <Grid.Col span={12} offset={2}>

@@ -114,7 +114,7 @@ function Categories() {
     fetchData()
   }, [])
 
-  async function fetchData(current = 1, pageSize = 20, params = {}) {
+  async function fetchData(current = 1, pageSize = 6, params = {}) {
     dispatch({type: UPDATE_LOADING, payload: {loading: true}})
     try {
       const result: any = await getList({
