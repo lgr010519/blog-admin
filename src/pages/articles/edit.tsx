@@ -140,11 +140,10 @@ const Edit = () => {
         <Card hoverable>
           <Form {...layout} form={form} initialValues={{
             isCollect: false,
-            isReward: false,
-            isComment: true,
-            isLike: true,
-            views: 1,
-            like: 1,
+            isComment: false,
+            isLike: false,
+            views: 0,
+            like: 0,
             collect: 0,
             comment: 0,
           }}>
@@ -201,10 +200,6 @@ const Edit = () => {
                       <Switch checkedText="显示" uncheckedText="隐藏"/>
                     </Form.Item>
                     <Form.Item label="收藏" layout="inline" field="isCollect"
-                               triggerPropName="checked">
-                      <Switch checkedText="显示" uncheckedText="隐藏"/>
-                    </Form.Item>
-                    <Form.Item label="打赏" layout="inline" field="isReward"
                                triggerPropName="checked">
                       <Switch checkedText="显示" uncheckedText="隐藏"/>
                     </Form.Item>

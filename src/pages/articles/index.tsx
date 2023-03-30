@@ -96,6 +96,7 @@ function Articles(props) {
       title: '分类',
       dataIndex: 'categories',
       align: 'center',
+      width: 120,
     },
     {
       title: '标签',
