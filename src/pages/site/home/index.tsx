@@ -76,22 +76,22 @@ const Home = () => {
                 <Card hoverable>
                     <Form form={form} layout="vertical">
                         <Grid.Row>
-                            <Grid.Col span={4}>
+                            <Grid.Col span={5}>
                                 <Form.Item label="归档背景图片" field="archiveBgImg" rules={[{ required: true, message: '请添加归档背景图片' }]}>
                                     <UploadImage showLink={false} showAction={false}/>
                                 </Form.Item>
                             </Grid.Col>
-                            <Grid.Col span={4}>
+                            <Grid.Col span={5}>
                                 <Form.Item label="分类背景图片" field="categoriesBgImg" rules={[{ required: true, message: '请添加分类背景图片' }]}>
                                     <UploadImage showLink={false} showAction={false}/>
                                 </Form.Item>
                             </Grid.Col>
-                            <Grid.Col span={4}>
+                            <Grid.Col span={5}>
                                 <Form.Item label="分类详情背景图片" field="categoriesDetailBgImg" rules={[{ required: true, message: '请添加分类详情背景图片' }]}>
                                     <UploadImage showLink={false} showAction={false}/>
                                 </Form.Item>
                             </Grid.Col>
-                            <Grid.Col span={4}>
+                            <Grid.Col span={5}>
                                 <Form.Item label="标签背景图片" field="tagsBgImg" rules={[{ required: true, message: '请添加标签背景图片' }]}>
                                     <UploadImage showLink={false} showAction={false}/>
                                 </Form.Item>
@@ -101,16 +101,11 @@ const Home = () => {
                                     <UploadImage showLink={false} showAction={false}/>
                                 </Form.Item>
                             </Grid.Col>
-                            <Grid.Col span={4}>
-                                <Form.Item label="关于背景图片" field="aboutBgImg" rules={[{ required: true, message: '请添加关于背景图片' }]}>
-                                    <UploadImage showLink={false} showAction={false}/>
-                                </Form.Item>
-                            </Grid.Col>
                         </Grid.Row>
                         <Grid.Row>
                             <Grid.Col span={12}>
                                 <Form.Item
-                                    label="简介"
+                                    label="Intro"
                                     field="introduction"
                                     rules={[{ required: true, message: '请输入详细介绍' },
                                         { maxLength: 800, message: '不能超过800个字符' }
@@ -120,9 +115,6 @@ const Home = () => {
                                 </Form.Item>
                             </Grid.Col>
                         </Grid.Row>
-                        <Form.Item label="简介特效" layout="inline" field="effects" triggerPropName="checked">
-                            <Switch checkedText="开启" uncheckedText="关闭"/>
-                        </Form.Item>
                     </Form>
                 </Card>
             </div>
