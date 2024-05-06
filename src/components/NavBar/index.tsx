@@ -1,24 +1,24 @@
-import React, {useContext, useEffect} from 'react';
+import React, { useContext, useEffect } from 'react';
 import {
-  Tooltip,
   Avatar,
-  Select,
+  Button,
   Dropdown,
   Menu,
   Message,
-  Button,
+  Select,
+  Tooltip,
 } from '@arco-design/web-react';
 import {
-  IconLanguage,
-  IconSunFill,
-  IconMoonFill,
-  IconSettings,
-  IconPoweroff,
   IconEdit,
+  IconLanguage,
+  IconMoonFill,
+  IconPoweroff,
+  IconSettings,
+  IconSunFill,
 } from '@arco-design/web-react/icon';
-import {useSelector, useDispatch} from 'react-redux';
-import {ReducerState} from '@/redux';
-import {GlobalContext} from '@/context';
+import { useDispatch, useSelector } from 'react-redux';
+import { ReducerState } from '@/redux';
+import { GlobalContext } from '@/context';
 import useLocale from '@/utils/useLocale';
 import Logo from '@/assets/logo.svg';
 import IconButton from './IconButton';
@@ -26,10 +26,9 @@ import Settings from '../Settings';
 import styles from './style/index.module.less';
 import defaultLocale from '@/locale';
 import useStorage from '@/utils/useStorage';
-import {generatePermission} from '@/routes';
-import {logout} from "@/api/login";
+import { generatePermission } from '@/routes';
 
-function Navbar({show}: { show: boolean }) {
+function Navbar({ show, history }) {
   const t = useLocale();
   const userInfo = useSelector((state: ReducerState) => state.login.userInfo);
   const dispatch = useDispatch();
@@ -37,23 +36,15 @@ function Navbar({show}: { show: boolean }) {
   const [_, setUserStatus] = useStorage('userStatus');
   const [role, setRole] = useStorage('userRole', 'admin');
 
-  const {setLang, lang, theme, setTheme} = useContext(GlobalContext);
+  const { setLang, lang, theme, setTheme } = useContext(GlobalContext);
 
-  async function fetchLogout() {
-    const result: any = await logout()
-    if (result.code === 200) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('userInfo')
-      Message.success(result.msg)
-      window.location.href = '/login';
-    }
-  }
-
-  function onMenuItemClick(key) {
+  function onMenuItemClick(key: string) {
     if (key === 'logout') {
-      fetchLogout();
+      localStorage.removeItem('token');
+      localStorage.removeItem('userInfo');
+      history.push('/login');
     } else if (key === 'publish') {
-      location.href = '/articles/edit'
+      history.push('/articles/edit');
     }
   }
 
@@ -74,7 +65,7 @@ function Navbar({show}: { show: boolean }) {
       <div className={styles['fixed-settings']}>
         <Settings
           trigger={
-            <Button icon={<IconSettings/>} type="primary" size="large"/>
+            <Button icon={<IconSettings />} type="primary" size="large" />
           }
         />
       </div>
@@ -127,11 +118,11 @@ function Navbar({show}: { show: boolean }) {
 
       <Divider style={{ margin: '4px 0' }} />*/}
       <Menu.Item key="publish">
-        <IconEdit className={styles['dropdown-icon']}/>
+        <IconEdit className={styles['dropdown-icon']} />
         {t['navbar.publish']}
       </Menu.Item>
       <Menu.Item key="logout">
-        <IconPoweroff className={styles['dropdown-icon']}/>
+        <IconPoweroff className={styles['dropdown-icon']} />
         {t['navbar.logout']}
       </Menu.Item>
     </Menu>
@@ -141,7 +132,7 @@ function Navbar({show}: { show: boolean }) {
     <div className={styles.navbar}>
       <div className={styles.left}>
         <div className={styles.logo}>
-          <Logo/>
+          <Logo />
           <div className={styles['logo-name']}>博客后台管理系统</div>
         </div>
       </div>
@@ -154,10 +145,10 @@ function Navbar({show}: { show: boolean }) {
         </li>*/}
         <li>
           <Select
-            triggerElement={<IconButton icon={<IconLanguage/>}/>}
+            triggerElement={<IconButton icon={<IconLanguage />} />}
             options={[
-              {label: '中文', value: 'zh-CN'},
-              {label: 'English', value: 'en-US'},
+              { label: '中文', value: 'zh-CN' },
+              { label: 'English', value: 'en-US' },
             ]}
             value={lang}
             triggerProps={{
@@ -187,7 +178,7 @@ function Navbar({show}: { show: boolean }) {
             }
           >
             <IconButton
-              icon={theme !== 'dark' ? <IconMoonFill/> : <IconSunFill/>}
+              icon={theme !== 'dark' ? <IconMoonFill /> : <IconSunFill />}
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
             />
           </Tooltip>
@@ -196,8 +187,8 @@ function Navbar({show}: { show: boolean }) {
         {userInfo && (
           <li>
             <Dropdown droplist={droplist} position="br">
-              <Avatar size={32} style={{cursor: 'pointer'}}>
-                <img alt="avatar" src={userInfo.avatar}/>
+              <Avatar size={32} style={{ cursor: 'pointer' }}>
+                <img alt="avatar" src={userInfo.avatar} />
               </Avatar>
             </Dropdown>
           </li>

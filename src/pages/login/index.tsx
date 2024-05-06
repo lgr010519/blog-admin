@@ -5,7 +5,7 @@ import LoginForm from './form';
 // import LoginBanner from './banner';
 import styles from './style/index.module.less';
 
-function Login() {
+function Login(props) {
   useEffect(() => {
     document.body.setAttribute('arco-theme', 'light');
   }, []);
@@ -16,14 +16,9 @@ function Login() {
         <Logo />
         <div className={styles['logo-text']}>博客后台管理系统</div>
       </div>
-      {/*<div className={styles.banner}>
-        <div className={styles['banner-inner']}>
-          <LoginBanner />
-        </div>
-      </div>*/}
       <div className={styles.content}>
         <div className={styles['content-inner']}>
-          <LoginForm />
+          <LoginForm history={props.history} />
         </div>
         <div className={styles.footer}>
           <Footer />
@@ -32,6 +27,7 @@ function Login() {
     </div>
   );
 }
+
 Login.displayName = 'LoginPage';
 
 export default Login;
