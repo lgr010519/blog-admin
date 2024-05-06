@@ -10,7 +10,7 @@ export const request = (config) => {
   // 请求拦截
   http.interceptors.request.use(
     (config) => {
-      if (config.method === 'put' || config.method === 'delete') {
+      if (config.method === 'delete') {
         const id = config.data._id || config.data.id;
         config.url += `/${id}`;
       }

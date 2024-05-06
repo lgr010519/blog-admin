@@ -11,10 +11,10 @@ import {
 const initialState = {
   data: [],
   pagination: {
-    sizeCanChange: false,
-    showTotal: true,
+    current: 1,
     pageSize: 10,
-    pageNum: 1,
+    showTotal: true,
+    sizeCanChange: false,
     pageSizeChangeResetCurrent: true,
   },
   loading: true,

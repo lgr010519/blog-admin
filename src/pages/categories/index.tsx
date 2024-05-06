@@ -109,12 +109,12 @@ function Categories() {
       });
       if (result.code === 0) {
         const handleResult = result;
-        handleResult.data.list.forEach((item) => {
+        handleResult.data.records.forEach((item) => {
           item.createTime = dayjs(new Date(+item.createTime)).format(
             'YYYY-MM-DD HH:mm:ss'
           );
           if (+item.updateTime) {
-            item.updateTime = dayjs(item.updateTime * 1000).format(
+            item.updateTime = dayjs(new Date(+item.updateTime)).format(
               'YYYY-MM-DD HH:mm:ss'
             );
           } else {
@@ -124,14 +124,14 @@ function Categories() {
         dispatch({ type: UPDATE_LOADING, payload: { loading: false } });
         dispatch({
           type: UPDATE_LIST,
-          payload: { data: handleResult.data.list },
+          payload: { data: handleResult.data.records },
         });
         dispatch({
           type: UPDATE_PAGINATION,
           payload: {
             pagination: {
               ...pagination,
-              pageNum,
+              current: pageNum,
               pageSize,
               total: handleResult.data.total,
             },
@@ -156,7 +156,7 @@ function Categories() {
       setAddOrUpdate('add');
     } else if (flag === 'update') {
       setAddOrUpdate('update');
-      setCategoryId(row._id);
+      setCategoryId(row.id);
       form.setFieldValue('name', row.name);
     }
     dispatch({
@@ -194,7 +194,7 @@ function Categories() {
           },
         });
         onCancel();
-        fetchData().then(Message.success(result.msg));
+        fetchData();
       } else {
         dispatch({
           type: TOGGLE_CONFIRM_LOADING,
@@ -202,11 +202,11 @@ function Categories() {
             confirmLoading: false,
           },
         });
-        Message.error('添加失败，请重试');
+        Message.error(result.msg);
       }
     } else if (addOrUpdate === 'update') {
       const result: any = await update({ ...data, id: categoryId });
-      if (result.code === 200) {
+      if (result.code === 0) {
         dispatch({
           type: TOGGLE_CONFIRM_LOADING,
           payload: {
@@ -214,7 +214,7 @@ function Categories() {
           },
         });
         onCancel();
-        fetchData().then(Message.success(result.msg));
+        fetchData();
       } else {
         dispatch({
           type: TOGGLE_CONFIRM_LOADING,
@@ -222,17 +222,17 @@ function Categories() {
             confirmLoading: false,
           },
         });
-        Message.error('修改失败，请重试');
+        Message.error(result.msg);
       }
     }
   };
 
   const onDelete = async (row) => {
     const result: any = await remove(row);
-    if (result.code === 200) {
-      fetchData().then(Message.success(result.msg));
+    if (result.code === 0) {
+      fetchData();
     } else {
-      Message.error('删除失败，请重试');
+      Message.error(result.msg);
     }
   };
 
