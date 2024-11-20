@@ -1,11 +1,10 @@
-import { Button, Form, Input, Message, Space } from '@arco-design/web-react';
+import { Button, Form, Input, Space } from '@arco-design/web-react';
 import { FormInstance } from '@arco-design/web-react/es/Form';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import React, { useRef, useState } from 'react';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/index.module.less';
-import { login as adminLogin } from '@/api/login';
 import { useDispatch } from 'react-redux';
 
 export default function LoginForm({ history }) {
@@ -17,28 +16,29 @@ export default function LoginForm({ history }) {
 
   function onLogin() {
     formRef.current.validate().then(async (values) => {
-      setErrorMessage('');
-      setLoading(true);
-      try {
-        const res: any = await adminLogin(values);
-        if (res.code === 0) {
-          Message.success('登录成功');
-          // 记录登录状态
-          localStorage.setItem('token', res.data.token);
-          dispatch({
-            type: 'LOGIN',
-            payload: res.data,
-          });
-          // 跳转首页
-          history.replace('/');
-        } else {
-          setErrorMessage(res.msg || t['login.form.login.errMsg']);
-        }
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoading(false);
-      }
+      history.replace('/');
+      // setErrorMessage('');
+      // setLoading(true);
+      // try {
+      //   const res: any = await adminLogin(values);
+      //   if (res.code === 0) {
+      //     Message.success('登录成功');
+      //     // 记录登录状态
+      //     localStorage.setItem('token', res.data.token);
+      //     dispatch({
+      //       type: 'LOGIN',
+      //       payload: res.data,
+      //     });
+      //     // 跳转首页
+      //     history.replace('/');
+      //   } else {
+      //     setErrorMessage(res.msg || t['login.form.login.errMsg']);
+      //   }
+      // } catch (err) {
+      //   console.log(err);
+      // } finally {
+      //   setLoading(false);
+      // }
     });
   }
 

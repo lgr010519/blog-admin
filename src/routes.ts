@@ -13,6 +13,10 @@ export type IRoute = AuthParams & {
 
 export const routes: IRoute[] = [
   {
+    name: 'menu.categories',
+    key: 'categories',
+  },
+  {
     name: 'menu.home',
     key: 'home',
   },
@@ -24,10 +28,6 @@ export const routes: IRoute[] = [
     name: 'menu.articles.edit',
     key: 'articles/edit',
     ignore: true,
-  },
-  {
-    name: 'menu.categories',
-    key: 'categories',
   },
   {
     name: 'menu.tags',
@@ -61,7 +61,7 @@ export const routes: IRoute[] = [
         name: 'menu.right',
         key: 'site/right',
       },
-    ]
+    ],
   },
 ];
 

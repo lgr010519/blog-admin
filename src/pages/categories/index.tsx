@@ -5,7 +5,6 @@ import {
   Card,
   Form,
   Input,
-  Message,
   Modal,
   Popconfirm,
   Table,
@@ -20,11 +19,10 @@ import {
   UPDATE_LOADING,
   UPDATE_PAGINATION,
 } from './redux/actionTypes';
-import { create, getList, remove, update } from '@/api/categories';
+import { getList, remove, saveOrUpdate } from '@/api/categories';
 import { ReducerState } from '@/redux';
-import dayjs from 'dayjs';
 
-function Categories() {
+export default function Categories() {
   const locale = useLocale();
 
   const columns: any = [
@@ -34,7 +32,6 @@ function Categories() {
       align: 'center',
       editable: true,
       fixed: 'left',
-      render: (_, record) => <span style={{ fontSize: 18 }}>{_}</span>,
     },
     {
       title: '文章数量',
@@ -45,11 +42,13 @@ function Categories() {
       title: '创建时间',
       dataIndex: 'createTime',
       align: 'center',
+      render: (_) => <span>{_ || '-'}</span>,
     },
     {
       title: '修改时间',
       dataIndex: 'updateTime',
       align: 'center',
+      render: (_) => <span>{_ || '-'}</span>,
     },
     {
       title: '操作',
@@ -65,7 +64,7 @@ function Categories() {
           >
             修改
           </Button>
-          <Popconfirm title="确定删除吗?" onOk={() => onDelete(record)}>
+          <Popconfirm title="确定删除吗?" onOk={() => onDelete(record.id)}>
             <Button type="text" status="danger" size="small">
               删除
             </Button>
@@ -82,7 +81,7 @@ function Categories() {
     CategoriesState;
   const dispatch = useDispatch();
   const [addOrUpdate, setAddOrUpdate] = useState('');
-  const [categoryId, setCategoryId] = useState('');
+  const [categoryId, setCategoryId] = useState(null);
 
   const formItemLayout = {
     labelCol: {
@@ -99,62 +98,59 @@ function Categories() {
     fetchData();
   }, []);
 
-  async function fetchData(pageNum = 1, pageSize = 10, params = {}) {
-    dispatch({ type: UPDATE_LOADING, payload: { loading: true } });
+  const fetchData = async (current = 1, size = 10, params = {}) => {
+    dispatch({
+      type: UPDATE_LOADING,
+      payload: { loading: true },
+    });
     try {
-      const result: any = await getList({
-        pageNum,
-        pageSize,
+      const res: any = await getList({
+        current,
+        size,
         ...params,
       });
-      if (result.code === 0) {
-        const handleResult = result;
-        handleResult.data.records.forEach((item) => {
-          item.createTime = dayjs(new Date(+item.createTime)).format(
-            'YYYY-MM-DD HH:mm:ss'
-          );
-          if (+item.updateTime) {
-            item.updateTime = dayjs(new Date(+item.updateTime)).format(
-              'YYYY-MM-DD HH:mm:ss'
-            );
-          } else {
-            item.updateTime = '-';
-          }
-        });
-        dispatch({ type: UPDATE_LOADING, payload: { loading: false } });
-        dispatch({
-          type: UPDATE_LIST,
-          payload: { data: handleResult.data.records },
-        });
-        dispatch({
-          type: UPDATE_PAGINATION,
-          payload: {
-            pagination: {
-              ...pagination,
-              current: pageNum,
-              pageSize,
-              total: handleResult.data.total,
-            },
+      dispatch({
+        type: UPDATE_LIST,
+        payload: { data: res.data.records },
+      });
+      dispatch({
+        type: UPDATE_PAGINATION,
+        payload: {
+          pagination: {
+            ...pagination,
+            current,
+            size,
+            total: res.data.total,
           },
-        });
-        dispatch({ type: UPDATE_FORM_PARAMS, payload: { params } });
-      }
-    } catch (e) {}
-  }
+        },
+      });
+      dispatch({
+        type: UPDATE_FORM_PARAMS,
+        payload: { params },
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch({
+        type: UPDATE_LOADING,
+        payload: { loading: false },
+      });
+    }
+  };
 
-  function onChangeTable(pagination) {
+  const onChangeTable = (pagination) => {
     const { current, pageSize } = pagination;
     fetchData(current, pageSize, formParams);
-  }
+  };
 
-  function onSearch(name) {
+  const onSearch = (name) => {
     fetchData(1, pagination.pageSize, { name });
-  }
+  };
 
   const onAdd = (flag, row) => {
     if (flag === 'add') {
       setAddOrUpdate('add');
-    } else if (flag === 'update') {
+    } else {
       setAddOrUpdate('update');
       setCategoryId(row.id);
       form.setFieldValue('name', row.name);
@@ -166,6 +162,7 @@ function Categories() {
       },
     });
   };
+
   const onCancel = () => {
     dispatch({
       type: TOGGLE_VISIBLE,
@@ -175,6 +172,7 @@ function Categories() {
     });
     form.resetFields();
   };
+
   const onOk = async () => {
     await form.validate();
     const data = form.getFields();
@@ -184,56 +182,28 @@ function Categories() {
         confirmLoading: true,
       },
     });
-    if (addOrUpdate === 'add') {
-      const result: any = await create(data);
-      if (result.code === 0) {
-        dispatch({
-          type: TOGGLE_CONFIRM_LOADING,
-          payload: {
-            confirmLoading: false,
-          },
-        });
-        onCancel();
-        fetchData();
-      } else {
-        dispatch({
-          type: TOGGLE_CONFIRM_LOADING,
-          payload: {
-            confirmLoading: false,
-          },
-        });
-        Message.error(result.msg);
-      }
-    } else if (addOrUpdate === 'update') {
-      const result: any = await update({ ...data, id: categoryId });
-      if (result.code === 0) {
-        dispatch({
-          type: TOGGLE_CONFIRM_LOADING,
-          payload: {
-            confirmLoading: false,
-          },
-        });
-        onCancel();
-        fetchData();
-      } else {
-        dispatch({
-          type: TOGGLE_CONFIRM_LOADING,
-          payload: {
-            confirmLoading: false,
-          },
-        });
-        Message.error(result.msg);
-      }
+    try {
+      await saveOrUpdate({
+        id: addOrUpdate === 'update' ? categoryId : undefined,
+        ...data,
+      });
+      onCancel();
+      fetchData();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch({
+        type: TOGGLE_CONFIRM_LOADING,
+        payload: {
+          confirmLoading: false,
+        },
+      });
     }
   };
 
-  const onDelete = async (row) => {
-    const result: any = await remove(row);
-    if (result.code === 0) {
-      fetchData();
-    } else {
-      Message.error(result.msg);
-    }
+  const onDelete = async (id) => {
+    await remove({ id });
+    fetchData();
   };
 
   return (
@@ -291,5 +261,3 @@ function Categories() {
     </div>
   );
 }
-
-export default Categories;

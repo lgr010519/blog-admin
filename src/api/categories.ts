@@ -1,33 +1,25 @@
-import {request} from "@/api/request";
+import { request } from '@/api/request';
 
-export function getList(params){
-    return request({
-        url: '/categories',
-        method: 'GET',
-        params,
-    })
+export function getList(params) {
+  return request({
+    url: '/admin/category/getList',
+    method: 'GET',
+    params,
+  });
 }
 
-export function create(data){
-    return request({
-        url: '/categories',
-        method: 'POST',
-        data,
-    })
+export function saveOrUpdate(data) {
+  return request({
+    url: '/admin/category/saveOrUpdate',
+    method: 'POST',
+    data,
+  });
 }
 
-export function update(data){
-    return request({
-        url: '/categories',
-        method: 'PUT',
-        data,
-    })
-}
-
-export function remove(data){
-    return request({
-        url: '/categories',
-        method: 'DELETE',
-        data,
-    })
+export function remove(params) {
+  return request({
+    url: '/admin/category/remove',
+    method: 'DELETE',
+    params,
+  });
 }
