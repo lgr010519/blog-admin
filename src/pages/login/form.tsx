@@ -1,46 +1,65 @@
-import { Button, Form, Input, Space } from '@arco-design/web-react';
+import { Button, Form, Input, Message, Space } from '@arco-design/web-react';
 import { FormInstance } from '@arco-design/web-react/es/Form';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/index.module.less';
 import { useDispatch } from 'react-redux';
+import * as api from '@/api/login';
 
 export default function LoginForm({ history }) {
   const t = useLocale(locale);
+  const dispatch = useDispatch();
   const formRef = useRef<FormInstance>();
+
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const dispatch = useDispatch();
+  const [captcha, setCaptcha] = useState({
+    image: '',
+    key: '',
+  });
 
-  function onLogin() {
+  const getCaptcha = async () => {
+    try {
+      const res = await api.getCaptcha();
+      setCaptcha(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onLogin = () => {
     formRef.current.validate().then(async (values) => {
-      history.replace('/');
-      // setErrorMessage('');
-      // setLoading(true);
-      // try {
-      //   const res: any = await adminLogin(values);
-      //   if (res.code === 0) {
-      //     Message.success('登录成功');
-      //     // 记录登录状态
-      //     localStorage.setItem('token', res.data.token);
-      //     dispatch({
-      //       type: 'LOGIN',
-      //       payload: res.data,
-      //     });
-      //     // 跳转首页
-      //     history.replace('/');
-      //   } else {
-      //     setErrorMessage(res.msg || t['login.form.login.errMsg']);
-      //   }
-      // } catch (err) {
-      //   console.log(err);
-      // } finally {
-      //   setLoading(false);
-      // }
+      setLoading(true);
+      try {
+        const res: any = await api.login({
+          ...values,
+          captchaKey: captcha.key,
+        });
+        // 记录登录状态
+        localStorage.setItem('token', res.data);
+        const userInfo = await api.getUserInfo();
+        console.log('userInfo', userInfo);
+        // dispatch({
+        //   type: 'LOGIN',
+        //   payload: res.data,
+        // });
+        setLoading(false);
+        Message.success('登录成功');
+        // 跳转首页
+        history.replace('/');
+      } catch (error) {
+        console.log(error);
+        setErrorMessage(error.message);
+        setLoading(false);
+      }
     });
-  }
+  };
+
+  useEffect(() => {
+    getCaptcha();
+  }, []);
 
   return (
     <div className={styles['login-form-wrapper']}>
@@ -50,7 +69,7 @@ export default function LoginForm({ history }) {
         className={styles['login-form']}
         layout="vertical"
         ref={formRef}
-        initialValues={{ username: 'admin123', password: '123456' }}
+        initialValues={{ username: 'admin', password: '123456' }}
       >
         <Form.Item
           field="username"
@@ -84,6 +103,25 @@ export default function LoginForm({ history }) {
             onPressEnter={onLogin}
           />
         </Form.Item>
+        <Space>
+          <Form.Item
+            field="captchaCode"
+            rules={[{ required: true, message: '请输入验证码' }]}
+          >
+            <Input
+              style={{ width: '184px' }}
+              prefix={<IconLock />}
+              placeholder="请输入验证码"
+              onPressEnter={onLogin}
+            />
+          </Form.Item>
+          <img
+            src={captcha.image}
+            alt=""
+            onClick={getCaptcha}
+            style={{ cursor: 'pointer', marginTop: '-14px' }}
+          />
+        </Space>
         <Space size={16} direction="vertical">
           <Button type="primary" long onClick={onLogin} loading={loading}>
             {t['login.form.login']}

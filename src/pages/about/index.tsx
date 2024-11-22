@@ -6,7 +6,7 @@ import Save from '@/components/Save';
 import UploadImage from '@/components/UploadImage';
 import { addAbout, queryAbout, updateAbout } from '@/api/about';
 
-const About = () => {
+export default function About() {
   const [form] = Form.useForm();
   const [time, setTime] = useState(null);
 
@@ -16,8 +16,8 @@ const About = () => {
 
   const onSave = async () => {
     await form.validate();
-    const values = await form.getFields();
-    values.imgs = values.imgs?.map((item) => {
+    const values = form.getFields();
+    values.imgs = values.imgs?.map((item: { imgUrl: string; link: string }) => {
       return {
         imgUrl: item.imgUrl,
         link: item.link,
@@ -90,6 +90,4 @@ const About = () => {
       <Save time={time} onRefresh={onRefresh} onSave={onSave} />
     </>
   );
-};
-
-export default About;
+}

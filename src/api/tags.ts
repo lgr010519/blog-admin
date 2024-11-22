@@ -1,41 +1,25 @@
-import {request} from "@/api/request";
+import { request } from '@/api/request';
 
-export function getList(params){
-    return request({
-        url: '/tags',
-        method: 'GET',
-        params,
-    })
+export function getList(params) {
+  return request({
+    url: '/admin/tag/getList',
+    method: 'GET',
+    params,
+  });
 }
 
-export function create(data){
-    return request({
-        url: '/tags',
-        method: 'POST',
-        data,
-    })
+export function saveOrUpdate(data) {
+  return request({
+    url: '/admin/tag/saveOrUpdate',
+    method: 'POST',
+    data,
+  });
 }
 
-export function update(data){
-    return request({
-        url: '/tags',
-        method: 'PUT',
-        data,
-    })
-}
-
-export function updateStatus(data){
-    return request({
-        url: `/tags/status`,
-        method: 'PUT',
-        data,
-    })
-}
-
-export function remove(data){
-    return request({
-        url: '/tags',
-        method: 'DELETE',
-        data,
-    })
+export function remove(params) {
+  return request({
+    url: '/admin/tag/remove',
+    method: 'DELETE',
+    params,
+  });
 }

@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { Notification } from '@arco-design/web-react';
+import { Message } from '@arco-design/web-react';
 
 export const request = (config: AxiosRequestConfig) => {
   const http = axios.create({
@@ -11,7 +11,11 @@ export const request = (config: AxiosRequestConfig) => {
   http.interceptors.request.use(
     (config) => {
       const token = localStorage.getItem('token');
-      token && (config.headers.Authorization = 'Bearer ' + token);
+
+      if (token) {
+        config.headers.Authorization = 'Bearer ' + token;
+        config.headers['access-token'] = token;
+      }
 
       return config;
     },
@@ -23,18 +27,18 @@ export const request = (config: AxiosRequestConfig) => {
   // 响应拦截
   http.interceptors.response.use(
     (res) => {
-      return res.data ? res.data : res;
+      if (res.data.code && res.data.code !== 200) {
+        if (res.data.code === 305) {
+          location.href = '/login';
+        }
+
+        return Promise.reject(new Error(res.data.message));
+      }
+
+      return res.data;
     },
     (error) => {
-      Notification.error({
-        title: '错误',
-        content: error.message,
-      });
-
-      if (error.response && error.response.status === 401) {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-      }
+      Message.error(error.message);
 
       return Promise.reject(error);
     }

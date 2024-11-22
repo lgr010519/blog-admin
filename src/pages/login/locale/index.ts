@@ -22,7 +22,7 @@ const i18n = {
     'login.banner.subSlogan3': 'Realize flexible block development',
   },
   'zh-CN': {
-    'login.form.title': '登录',
+    'login.form.title': '登 录',
     'login.form.username.errMsg1': '用户名不能为空',
     'login.form.username.errMsg2': '用户名5-20位',
     'login.form.password.errMsg1': '密码不能为空',

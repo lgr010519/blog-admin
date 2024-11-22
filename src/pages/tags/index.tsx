@@ -5,7 +5,6 @@ import {
   Card,
   Form,
   Input,
-  Message,
   Modal,
   Popconfirm,
   Switch,
@@ -21,12 +20,11 @@ import {
   UPDATE_LOADING,
   UPDATE_PAGINATION,
 } from './redux/actionTypes';
-import { create, getList, remove, update, updateStatus } from '@/api/tags';
+import { getList, remove, saveOrUpdate } from '@/api/tags';
 import { ReducerState } from '@/redux';
 import { IconCheck, IconClose } from '@arco-design/web-react/icon';
-import dayjs from 'dayjs';
 
-function Tags() {
+export default function Tags() {
   const locale = useLocale();
   const [title, setTitle] = useState('添加标签');
 
@@ -37,7 +35,6 @@ function Tags() {
       align: 'center',
       editable: true,
       fixed: 'left',
-      render: (_, record) => <span style={{ fontSize: 18 }}>{_}</span>,
     },
     {
       title: '文章数量',
@@ -63,11 +60,13 @@ function Tags() {
       title: '创建时间',
       dataIndex: 'createTime',
       align: 'center',
+      render: (_) => <span>{_ || '-'}</span>,
     },
     {
       title: '修改时间',
       dataIndex: 'updateTime',
       align: 'center',
+      render: (_) => <span>{_ || '-'}</span>,
     },
     {
       title: '操作',
@@ -86,7 +85,7 @@ function Tags() {
           </Button>
           <Popconfirm
             title="确定删除吗?"
-            onOk={() => onDelete(record)}
+            onOk={() => onDelete(record.id)}
             disabled={record.status}
           >
             <Button
@@ -103,11 +102,9 @@ function Tags() {
     },
   ];
 
-  const categoriesState = useSelector(
-    (state: ReducerState) => state.categories
-  );
+  const tagsState = useSelector((state: ReducerState) => state.tags);
   const { data, pagination, loading, formParams, visible, confirmLoading } =
-    categoriesState;
+    tagsState;
   const dispatch = useDispatch();
 
   const formItemLayout = {
@@ -125,57 +122,54 @@ function Tags() {
     fetchData();
   }, []);
 
-  async function fetchData(current = 1, pageSize = 10, params = {}) {
-    dispatch({ type: UPDATE_LOADING, payload: { loading: true } });
+  const fetchData = async (current = 1, size = 10, params = {}) => {
+    dispatch({
+      type: UPDATE_LOADING,
+      payload: { loading: true },
+    });
     try {
-      const result: any = await getList({
-        pageNum: current,
-        pageSize,
+      const res: any = await getList({
+        current,
+        size,
         ...params,
       });
-      if (result.code === 0) {
-        const handleResult = result;
-        handleResult.data.records.forEach((item) => {
-          item.createTime = dayjs(new Date(+item.createTime)).format(
-            'YYYY-MM-DD HH:mm:ss'
-          );
-          if (+item.updateTime) {
-            item.updateTime = dayjs(new Date(+item.updateTime)).format(
-              'YYYY-MM-DD HH:mm:ss'
-            );
-          } else {
-            item.updateTime = '-';
-          }
-        });
-        dispatch({ type: UPDATE_LOADING, payload: { loading: false } });
-        dispatch({
-          type: UPDATE_LIST,
-          payload: { data: handleResult.data.records },
-        });
-        dispatch({
-          type: UPDATE_PAGINATION,
-          payload: {
-            pagination: {
-              ...pagination,
-              current,
-              pageSize,
-              total: handleResult.data.total,
-            },
+      dispatch({
+        type: UPDATE_LIST,
+        payload: { data: res.data.records },
+      });
+      dispatch({
+        type: UPDATE_PAGINATION,
+        payload: {
+          pagination: {
+            ...pagination,
+            current,
+            size,
+            total: res.data.total,
           },
-        });
-        dispatch({ type: UPDATE_FORM_PARAMS, payload: { params } });
-      }
-    } catch (e) {}
-  }
+        },
+      });
+      dispatch({
+        type: UPDATE_FORM_PARAMS,
+        payload: { params },
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch({
+        type: UPDATE_LOADING,
+        payload: { loading: false },
+      });
+    }
+  };
 
-  function onChangeTable(pagination) {
+  const onChangeTable = (pagination: { current: number; pageSize: number }) => {
     const { current, pageSize } = pagination;
     fetchData(current, pageSize, formParams);
-  }
+  };
 
-  function onSearch(name) {
+  const onSearch = (name: string) => {
     fetchData(1, pagination.pageSize, { name });
-  }
+  };
 
   const onAdd = () => {
     dispatch({
@@ -186,43 +180,8 @@ function Tags() {
     });
     setTitle('添加标签');
   };
-  const onCancel = () => {
-    dispatch({
-      type: TOGGLE_VISIBLE,
-      payload: {
-        visible: false,
-      },
-    });
-    form.resetFields();
-  };
-  const onOk = async () => {
-    await form.validate();
-    const data = form.getFields();
-    let func = create;
-    if (data.id) {
-      func = update;
-    }
-    dispatch({
-      type: TOGGLE_CONFIRM_LOADING,
-      payload: {
-        confirmLoading: true,
-      },
-    });
-    const result: any = await func(data);
-    if (result.code === 0) {
-      dispatch({
-        type: TOGGLE_CONFIRM_LOADING,
-        payload: {
-          confirmLoading: false,
-        },
-      });
-      onCancel();
-      fetchData();
-    } else {
-      Message.error(result.msg);
-    }
-  };
-  const onUpdate = (row) => {
+
+  const onUpdate = (row: any) => {
     dispatch({
       type: TOGGLE_VISIBLE,
       payload: {
@@ -232,23 +191,63 @@ function Tags() {
     setTitle('修改标签');
     form.setFieldsValue(row);
   };
-  const onDelete = async (row) => {
-    const result: any = await remove(row);
-    if (result.code === 0) {
+
+  const onCancel = () => {
+    dispatch({
+      type: TOGGLE_VISIBLE,
+      payload: {
+        visible: false,
+      },
+    });
+    form.resetFields();
+  };
+
+  const onOk = async () => {
+    await form.validate();
+    const data = form.getFields();
+    dispatch({
+      type: TOGGLE_CONFIRM_LOADING,
+      payload: {
+        confirmLoading: true,
+      },
+    });
+    try {
+      await saveOrUpdate(data);
+      onCancel();
       fetchData();
-    } else {
-      Message.error(result.msg);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch({
+        type: TOGGLE_CONFIRM_LOADING,
+        payload: {
+          confirmLoading: false,
+        },
+      });
     }
   };
-  const onStatusChange = async (status: boolean, row) => {
-    const result: any = await updateStatus({
-      id: row.id,
-      status: status ? 0 : 1,
-    });
-    if (result.code === 0) {
+
+  const onDelete = async (id: number) => {
+    try {
+      await remove({ id });
       fetchData();
-    } else {
-      Message.error(result.msg);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onStatusChange = async (
+    status: boolean,
+    row: { id: number; status: number }
+  ) => {
+    try {
+      await saveOrUpdate({
+        id: row.id,
+        status: row.status ? 0 : 1,
+      });
+      fetchData();
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -303,5 +302,3 @@ function Tags() {
     </div>
   );
 }
-
-export default Tags;
