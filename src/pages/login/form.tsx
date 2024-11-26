@@ -5,12 +5,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/index.module.less';
-import { useDispatch } from 'react-redux';
 import * as api from '@/api/login';
 
 export default function LoginForm({ history }) {
   const t = useLocale(locale);
-  const dispatch = useDispatch();
   const formRef = useRef<FormInstance>();
 
   const [errorMessage, setErrorMessage] = useState('');
@@ -40,11 +38,7 @@ export default function LoginForm({ history }) {
         // 记录登录状态
         localStorage.setItem('token', res.data);
         const userInfo = await api.getUserInfo();
-        console.log('userInfo', userInfo);
-        // dispatch({
-        //   type: 'LOGIN',
-        //   payload: res.data,
-        // });
+        localStorage.setItem('userInfo', JSON.stringify(userInfo.data));
         setLoading(false);
         Message.success('登录成功');
         // 跳转首页

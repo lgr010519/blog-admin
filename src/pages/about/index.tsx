@@ -3,8 +3,8 @@ import styles from './style/index.module.less';
 import { Card, Form, Grid, Input, Message } from '@arco-design/web-react';
 import BlogTags from './components/tags';
 import Save from '@/components/Save';
-import UploadImage from '@/components/UploadImage';
 import { addAbout, queryAbout, updateAbout } from '@/api/about';
+import UploadImage from '@/components/UploadImage';
 
 export default function About() {
   const [form] = Form.useForm();
@@ -35,14 +35,19 @@ export default function About() {
   };
 
   const loadData = async (isRefresh?: boolean) => {
-    const result: any = await queryAbout();
-    if (isRefresh) {
-      Message.success('刷新成功');
+    try {
+      const res: any = await queryAbout();
+      if (isRefresh) {
+        Message.success('刷新成功');
+      }
+      const data = res.data;
+      if (!data) return;
+      data[0].tagCloudList = data[0].tagCloudList.map((item) => item.name);
+      form.setFieldsValue(data[0]);
+      setTime(data[0].updateTime);
+    } catch (error) {
+      console.log(error);
     }
-    const data = result.data;
-    if (!data) return;
-    form.setFieldsValue(data);
-    setTime(data.updateTime);
   };
 
   useEffect(() => {
@@ -58,7 +63,7 @@ export default function About() {
               <Grid.Col span={10}>
                 <Form.Item
                   label="标签云：(1-20个)"
-                  field="tags"
+                  field="tagCloudList"
                   rules={[{ required: true, message: '请添加标签' }]}
                 >
                   <BlogTags max={20} />
@@ -68,16 +73,16 @@ export default function About() {
                   field="description"
                   rules={[
                     { required: true, message: '请输入详细介绍' },
-                    { maxLength: 800, message: '不能超过800个字符' },
+                    { maxLength: 800, message: '不能超过1000个字符' },
                   ]}
                 >
-                  <Input.TextArea rows={5} maxLength={800} showWordLimit />
+                  <Input.TextArea rows={5} maxLength={1000} showWordLimit />
                 </Form.Item>
               </Grid.Col>
               <Grid.Col span={12} offset={2}>
                 <Form.Item
                   label="介绍图片：(1-3张)"
-                  field="imgs"
+                  field="aboutImgList"
                   rules={[{ required: true, message: '请添加介绍图片' }]}
                 >
                   <UploadImage max={3} showIcon />

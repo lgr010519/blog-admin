@@ -28,7 +28,8 @@ export const request = (config: AxiosRequestConfig) => {
   http.interceptors.response.use(
     (res) => {
       if (res.data.code && res.data.code !== 200) {
-        if (res.data.code === 305) {
+        if (res.data.code === 305 || res.data.code === 601) {
+          Message.error('登录状态过期，请重新登录');
           location.href = '/login';
         }
 
@@ -38,6 +39,12 @@ export const request = (config: AxiosRequestConfig) => {
       return res.data;
     },
     (error) => {
+      if (error.message.indexOf('404') > -1) {
+        Message.error('服务器请求失败，请重试');
+
+        return Promise.reject(error);
+      }
+
       Message.error(error.message);
 
       return Promise.reject(error);
