@@ -7,18 +7,10 @@ export function queryAbout() {
   });
 }
 
-export function addAbout(data) {
+export function saveOrUpdate(data) {
   return request({
-    url: '/about',
+    url: '/admin/about/saveOrUpdate',
     method: 'POST',
-    data,
-  });
-}
-
-export function updateAbout(data) {
-  return request({
-    url: '/about',
-    method: 'PUT',
     data,
   });
 }

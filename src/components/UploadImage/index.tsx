@@ -40,10 +40,10 @@ const UploadImage = (props) => {
     } else {
       if (Array.isArray(value)) {
         const length = value.length;
-        value.map((item, idx) => {
+        value.map((item, index) => {
           if (length < max) {
             item.showReduce = length !== 1;
-            item.showAdd = length === idx + 1;
+            item.showAdd = length === index + 1;
           } else {
             item.showReduce = true;
             item.showAdd = false;

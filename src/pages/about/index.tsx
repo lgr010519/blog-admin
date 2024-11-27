@@ -3,7 +3,7 @@ import styles from './style/index.module.less';
 import { Card, Form, Grid, Input, Message } from '@arco-design/web-react';
 import BlogTags from './components/tags';
 import Save from '@/components/Save';
-import { addAbout, queryAbout, updateAbout } from '@/api/about';
+import { queryAbout, saveOrUpdate } from '@/api/about';
 import UploadImage from '@/components/UploadImage';
 
 export default function About() {
@@ -16,22 +16,29 @@ export default function About() {
 
   const onSave = async () => {
     await form.validate();
-    const values = form.getFields();
-    values.imgs = values.imgs?.map((item: { imgUrl: string; link: string }) => {
-      return {
-        imgUrl: item.imgUrl,
-        link: item.link,
-      };
-    });
-    const func = values.id ? updateAbout : addAbout;
-    const result: any = await func(values);
-    if (result.data) {
+    const formData = form.getFields();
+    const fields = {
+      id: formData.id,
+      description: formData.description,
+      aboutImgList: formData.aboutImgList.map(
+        (item: { imgUrl: string }) => item.imgUrl
+      ),
+      tagCloudList: formData.tagCloudList,
+    };
+    try {
+      await saveOrUpdate(fields);
       loadData();
-      setTime(result.data.updateTime);
-      Message.success(result.msg);
-    } else {
-      Message.error('修改失败，请重试');
+      Message.success('保存成功');
+    } catch (error) {
+      console.log(error);
     }
+    // const func = values.id ? updateAbout : addAbout;
+    // const result: any = await func(values);
+    // if (result.data) {
+    //   loadData();
+    //   setTime(result.data.updateTime);
+    //   Message.success(result.msg);
+    // }
   };
 
   const loadData = async (isRefresh?: boolean) => {
@@ -40,11 +47,12 @@ export default function About() {
       if (isRefresh) {
         Message.success('刷新成功');
       }
-      const data = res.data;
-      if (!data) return;
-      data[0].tagCloudList = data[0].tagCloudList.map((item) => item.name);
-      form.setFieldsValue(data[0]);
-      setTime(data[0].updateTime);
+      const aboutDetail = res.data[0];
+      aboutDetail.tagCloudList = aboutDetail.tagCloudList.map(
+        (item) => item.name
+      );
+      form.setFieldsValue(aboutDetail);
+      setTime(aboutDetail.updateTime);
     } catch (error) {
       console.log(error);
     }

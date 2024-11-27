@@ -9,8 +9,9 @@ import {
   Spin,
   Upload,
 } from '@arco-design/web-react';
-import { IconDelete, IconEdit, IconPlus } from '@arco-design/web-react/icon';
+import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { imagesType } from '@/constant';
+import { fileUpload } from '@/api/fileUpload';
 
 const Item = (props) => {
   const {
@@ -20,12 +21,9 @@ const Item = (props) => {
     index = 0,
     showImg,
     showLink,
-    showIcon,
     showAction,
     showAdd,
     showReduce = false,
-    link,
-    icon,
     imgUrl,
   } = props;
   const [imageUrl, setImageUrl] = useState<string>(imgUrl || '');
@@ -62,14 +60,6 @@ const Item = (props) => {
     });
   };
 
-  const handleChangeIcon = (value) => {
-    onChange({
-      index,
-      field: 'icon',
-      value,
-    });
-  };
-
   const beforeUpload = async (file) => {
     const isImage = imagesType.includes(file.type);
     if (!isImage) {
@@ -83,21 +73,18 @@ const Item = (props) => {
     setImageUrl('');
     const formData = new FormData();
     formData.append('file', file);
-    // const result = await upload(formData)
-    const result = [
-      {
-        hash: 'afshjdvsadlkjfhsdajnv',
-        key: '390485734895731141.png',
-        url: 'http://localhost:3000',
-      },
-    ];
-    if (result) {
-      // setImageUrl(result[0].url)
+    try {
+      const res = await fileUpload(formData);
+      setImageUrl(res.data);
       onChange({
         index,
         field: 'imgUrl',
-        value: result[0].url,
+        value: res.data,
       });
+    } catch (error) {
+      console.log(error);
+      Message.error('上传失败，请重试');
+    } finally {
       setLoading(false);
     }
     return false;
@@ -116,9 +103,9 @@ const Item = (props) => {
             >
               {imageUrl ? (
                 <div className="arco-upload-list-item-picture custom-upload-avatar">
-                  <img src={imageUrl} />
+                  <img src={imageUrl} alt="" />
                   <div className="arco-upload-list-item-picture-mask">
-                    <IconEdit />
+                    <IconPlus />
                   </div>
                 </div>
               ) : (
@@ -145,14 +132,6 @@ const Item = (props) => {
               value={imgUrl}
               className={styles.input}
               addBefore="链接"
-            />
-          )}
-          {showIcon && (
-            <Input
-              onChange={handleChangeIcon}
-              value={icon}
-              className={styles.input}
-              addBefore="图标"
             />
           )}
         </div>
