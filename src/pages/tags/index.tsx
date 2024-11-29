@@ -52,7 +52,7 @@ export default function Tags() {
           uncheckedIcon={<IconClose />}
           checkedText="启用"
           uncheckedText="停用"
-          checked={record.status === 0}
+          checked={record.status === 1}
         />
       ),
     },

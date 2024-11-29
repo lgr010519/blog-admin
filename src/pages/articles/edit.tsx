@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './style/index.module.less';
 import {
   Card,
@@ -12,7 +12,7 @@ import {
 } from '@arco-design/web-react';
 import Save from '@/components/Save';
 import UploadImage from '@/components/UploadImage';
-import { create, queryArticles, update } from '@/api/articles';
+import { queryArticles, saveOrUpdate } from '@/api/articles';
 import { getList as getCategoryList } from '@/api/categories';
 import { getList as getTagList } from '@/api/tags';
 import MdEditor from 'for-editor';
@@ -50,34 +50,36 @@ const Edit = () => {
   const editorRef = useRef<any>();
   const { search } = useLocation();
 
+  const id = useMemo(() => {
+    if (search) {
+      return search.split('id=')[1];
+    }
+    return '';
+  }, [search]);
+
   const onRefresh = () => {
     loadData(true);
   };
 
-  const onSave = async (publishStatus) => {
+  const onSave = async (publishStatus: number) => {
     await form.validate();
-    const values = await form.getFields();
+    const values = form.getFields();
+    values.isComment = values.isComment ? 1 : 0;
+    values.isLike = values.isLike ? 1 : 0;
+    values.isCollect = values.isCollect ? 1 : 0;
     values.cover = values.cover[0].imgUrl;
     values.publishStatus = publishStatus;
     values.status = 1;
-    if (id) {
-      values.id = id;
-    }
-    console.log(values);
-    const func = id ? update : create;
-    const result: any = await func(values);
-    if (result.code === 200) {
-      Message.success(result.msg);
+    id && (values.id = id);
+    try {
+      await saveOrUpdate(values);
+      Message.success(publishStatus ? '发布成功' : '保存成功');
       location.href = '/articles';
-    } else {
-      Message.error('保存失败，请重试');
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  let id = '';
-  if (search) {
-    id = search.split('id=')[1];
-  }
   const loadData = async (isRefresh?: boolean) => {
     if (!id) return;
     const result: any = await queryArticles({ id });
@@ -99,6 +101,7 @@ const Edit = () => {
     const res: any = await getTagList({
       current: 1,
       size: 9999,
+      status: 1,
     });
     const tagList = res.data.records.map((item) => ({
       key: item.id,
@@ -149,9 +152,9 @@ const Edit = () => {
             {...layout}
             form={form}
             initialValues={{
-              isCollect: false,
-              isComment: false,
-              isLike: false,
+              isCollect: true,
+              isComment: true,
+              isLike: true,
               views: 0,
               like: 0,
               collect: 0,
@@ -192,28 +195,28 @@ const Edit = () => {
                   <UploadImage showAction={false} showLink={false} />
                 </Form.Item>
                 <Form.Item
-                  field="categories"
+                  field="categoryId"
                   label="选择分类"
                   {...formItemLayout}
                   rules={[{ required: true, message: '请选择文章分类' }]}
                 >
                   <Select placeholder="请选择文章分类" defaultValue="">
                     {categoriesArr.map((item) => (
-                      <Select.Option key={item.key} value={item.value}>
+                      <Select.Option key={item.key} value={item.key}>
                         {item.value}
                       </Select.Option>
                     ))}
                   </Select>
                 </Form.Item>
                 <Form.Item
-                  field="tags"
+                  field="tagIdList"
                   label="选择标签"
                   {...formItemLayout}
                   rules={[{ required: true, message: '请选择文章标签' }]}
                 >
                   <Select placeholder="请选择文章标签" mode="multiple">
                     {tagsArr.map((item) => (
-                      <Select.Option key={item.key} value={item.value}>
+                      <Select.Option key={item.key} value={item.key}>
                         {item.value}
                       </Select.Option>
                     ))}
@@ -296,7 +299,7 @@ const Edit = () => {
         time={time}
         showBack
         onRefresh={id && onRefresh}
-        onSave={() => onSave(2)}
+        onSave={() => onSave(0)}
         onPublish={() => onSave(1)}
       />
     </>

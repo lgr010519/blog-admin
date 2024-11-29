@@ -393,7 +393,7 @@ function Articles(props) {
               <Form.Item field="categories" label="分类">
                 <Select placeholder="请选择分类" mode="multiple">
                   {categoriesArr.map((item) => (
-                    <Select.Option key={item.key} value={item.value}>
+                    <Select.Option key={item.key} value={item.key}>
                       {item.value}
                     </Select.Option>
                   ))}
@@ -404,7 +404,7 @@ function Articles(props) {
               <Form.Item field="tags" label="标签">
                 <Select placeholder="请选择标签" mode="multiple">
                   {tagsArr.map((item) => (
-                    <Select.Option key={item.key} value={item.value}>
+                    <Select.Option key={item.key} value={item.key}>
                       {item.value}
                     </Select.Option>
                   ))}
