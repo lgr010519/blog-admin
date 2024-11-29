@@ -2,7 +2,7 @@ import { request } from '@/api/request';
 
 export function getList(params) {
   return request({
-    url: '/articles',
+    url: '/admin/article/getList',
     method: 'GET',
     params,
   });
@@ -16,10 +16,10 @@ export function saveOrUpdate(data) {
   });
 }
 
-export function update(data) {
+export function updateStatus(data) {
   return request({
-    url: '/articles',
-    method: 'PUT',
+    url: '/admin/article/updateStatus',
+    method: 'POST',
     data,
   });
 }
@@ -31,34 +31,10 @@ export function queryArticles(params) {
   });
 }
 
-export function updateStatus(data) {
+export function remove(params) {
   return request({
-    url: '/articles/status',
-    method: 'PUT',
-    data,
-  });
-}
-
-export function updatePublishStatus(data) {
-  return request({
-    url: '/articles/publishStatus',
-    method: 'PUT',
-    data,
-  });
-}
-
-export function remove(data) {
-  return request({
-    url: '/articles',
+    url: '/admin/article/remove',
     method: 'DELETE',
-    data,
-  });
-}
-
-export function updateCollectStatus(data) {
-  return request({
-    url: '/articles/collectStatus',
-    method: 'POST',
-    data,
+    params,
   });
 }

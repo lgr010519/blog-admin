@@ -8,7 +8,6 @@ import {
   Form,
   Grid,
   Input,
-  Message,
   Popconfirm,
   Radio,
   Select,
@@ -24,47 +23,21 @@ import {
   UPDATE_LOADING,
   UPDATE_PAGINATION,
 } from './redux/actionTypes';
-import {
-  getList,
-  remove,
-  updateCollectStatus,
-  updatePublishStatus,
-  updateStatus,
-} from '@/api/articles';
+import { getList, remove, updateStatus } from '@/api/articles';
 import { getList as getTagList } from '@/api/tags';
 import { getList as getCategoryList } from '@/api/categories';
 import { ReducerState } from '@/redux';
 import { publishStatusOptions, statusOptions } from '@/constant';
-import dayjs from 'dayjs';
 import { IconCheck, IconClose } from '@arco-design/web-react/icon';
 
-function Articles(props) {
-  const onStatusChange = async (checked, record) => {
-    const postData = {
-      id: record._id,
-      status: checked ? 1 : 0,
-    };
-    const result: any = await updateStatus(postData);
-    if (result.code === 200) {
-      Message.success(result.msg);
-      fetchData(1, 6, { status: 0 });
-    } else {
-      Message.error('修改失败，请重试');
-    }
-  };
-
-  const onChangePublishStatus = async (record) => {
-    const postData = {
-      id: record._id,
-      publishStatus: record.publishStatus === 1 ? 0 : 1,
-    };
-    const result: any = await updatePublishStatus(postData);
-    if (result.code === 200) {
-      Message.success(result.msg);
-      fetchData(1, 6, { status: 0 });
-    } else {
-      Message.error('修改失败，请重试');
-    }
+const Articles = (props: { history: string[] }) => {
+  const layout = {
+    labelCol: {
+      span: 8,
+    },
+    wrapperCol: {
+      span: 16,
+    },
   };
 
   const columns: any = [
@@ -73,15 +46,15 @@ function Articles(props) {
       dataIndex: 'title',
       align: 'center',
       fixed: 'left',
-      render: (_, record) => <span style={{ fontSize: 18 }}>{_}</span>,
+      render: (title: string) => <span style={{ fontSize: 18 }}>{title}</span>,
     },
     {
       title: '封面',
       dataIndex: 'cover',
       align: 'center',
-      render: (_, record) => (
+      render: (cover: string) => (
         <Avatar shape="square" size={64}>
-          <img src={record.cover} />
+          <img src={cover} alt="" />
         </Avatar>
       ),
     },
@@ -93,31 +66,20 @@ function Articles(props) {
     },
     {
       title: '分类',
-      dataIndex: 'categories',
+      dataIndex: 'categoryName',
       align: 'center',
       width: 120,
     },
     {
       title: '标签',
-      dataIndex: 'tags',
+      dataIndex: 'tagsList',
       align: 'center',
-      render: (_, record) => {
-        const result = [];
-        for (let i = 0; i < record.tags.length; i += 3) {
-          result.push(record.tags.slice(i, i + 3));
-        }
-        return result.map((item, index) => {
-          return (
-            <>
-              {item.map((sub) => (
-                <Tag style={{ marginRight: 10, marginBottom: 10 }} key={sub}>
-                  {sub}
-                </Tag>
-              ))}
-            </>
-          );
-        });
-      },
+      render: (_, record) =>
+        record.tagsList.map((item) => (
+          <Tag style={{ marginRight: 10, marginBottom: 10 }} key={item.id}>
+            {item.name}
+          </Tag>
+        )),
     },
     {
       title: '查看/评论/点赞/收藏',
@@ -146,20 +108,17 @@ function Articles(props) {
       title: '发布状态',
       dataIndex: 'publishStatus',
       align: 'center',
-      render: (text, record) => {
-        const texts = {
+      render: (publishStatus: number) => {
+        const text = {
           0: '未发布',
           1: '已发布',
         };
-        const enums = {
+        const status = {
           0: 'error',
           1: 'success',
         };
         return (
-          <Badge
-            status={enums[record.publishStatus]}
-            text={texts[record.publishStatus]}
-          />
+          <Badge status={status[publishStatus]} text={text[publishStatus]} />
         );
       },
     },
@@ -167,17 +126,12 @@ function Articles(props) {
       title: '创建时间',
       dataIndex: 'createTime',
       align: 'center',
-      render: (_, record) =>
-        dayjs(record.createTime * 1000).format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       title: '修改时间',
       dataIndex: 'updateTime',
       align: 'center',
-      render: (_, record) =>
-        record.updateTime
-          ? dayjs(record.updateTime * 1000).format('YYYY-MM-DD HH:mm:ss')
-          : '-',
+      render: (updateTime: string) => updateTime || '-',
     },
     {
       title: '操作',
@@ -188,7 +142,7 @@ function Articles(props) {
       render: (_, record) => (
         <div className={styles.operations}>
           <Button
-            onClick={() => onChangePublishStatus(record)}
+            onClick={() => onPublishStatusChange(record)}
             type="text"
             size="small"
           >
@@ -199,7 +153,7 @@ function Articles(props) {
               <Button onClick={() => onUpdate(record)} type="text" size="small">
                 修改
               </Button>
-              <Popconfirm title="确定删除吗?" onOk={() => onDelete(record)}>
+              <Popconfirm title="确定删除吗?" onOk={() => onDelete(record.id)}>
                 <Button type="text" status="danger" size="small">
                   删除
                 </Button>
@@ -214,91 +168,120 @@ function Articles(props) {
   const articlesState = useSelector((state: ReducerState) => state.articles);
   const { data, pagination, loading, formParams } = articlesState;
   const dispatch = useDispatch();
+  const [form] = Form.useForm();
+
   const [tagsArr, setTagsArr] = useState([]);
   const [categoriesArr, setCategoriesArr] = useState([]);
 
-  const [form] = Form.useForm();
-
-  useEffect(() => {
-    getTags();
-    getCategories();
-    fetchData(1, 6, { status: 0 });
-  }, []);
-
-  async function fetchData(current = 1, size = 6, params = {}) {
-    dispatch({ type: UPDATE_LOADING, payload: { loading: true } });
+  const fetchData = async (current = 1, size = 6, params = {}) => {
+    dispatch({
+      type: UPDATE_LOADING,
+      payload: {
+        loading: true,
+      },
+    });
     try {
-      const result: any = await getList({
+      const res: any = await getList({
         current,
         size,
         ...params,
       });
-      if (result) {
-        dispatch({ type: UPDATE_LOADING, payload: { loading: false } });
-        dispatch({ type: UPDATE_LIST, payload: { data: result.data.list } });
-        dispatch({
-          type: UPDATE_PAGINATION,
-          payload: {
-            pagination: {
-              ...pagination,
-              current,
-              pageSize: size,
-              total: result.data.totalCount,
-            },
+      res.data.records = res.data.records.filter((item: any) => item !== null);
+      dispatch({
+        type: UPDATE_LIST,
+        payload: {
+          data: res.data.records,
+        },
+      });
+      dispatch({
+        type: UPDATE_PAGINATION,
+        payload: {
+          pagination: {
+            ...pagination,
+            current,
+            pageSize: size,
+            total: res.data.total,
           },
-        });
-        dispatch({ type: UPDATE_FORM_PARAMS, payload: { params } });
-      }
-    } catch (e) {}
-  }
+        },
+      });
+      dispatch({
+        type: UPDATE_FORM_PARAMS,
+        payload: {
+          params,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch({
+        type: UPDATE_LOADING,
+        payload: {
+          loading: false,
+        },
+      });
+    }
+  };
+
+  const onStatusChange = async (checked: boolean, record: { id: number }) => {
+    try {
+      await updateStatus({
+        id: record.id,
+        status: checked ? 1 : 0,
+      });
+      fetchData(1, 6);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onPublishStatusChange = async (record: {
+    id: number;
+    publishStatus: number;
+  }) => {
+    try {
+      await updateStatus({
+        id: record.id,
+        publishStatus: record.publishStatus ? 0 : 1,
+      });
+      fetchData(1, 6);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   function onChangeTable(pagination) {
     const { current, pageSize } = pagination;
     fetchData(current, pageSize, formParams);
   }
 
-  const onSelectChange = (project) => {
-    fetchData(1, pagination.pageSize, { project });
-  };
-
   const onAdd = () => {
     props.history.push(`/articles/edit`);
   };
+
   const onUpdate = (row) => {
-    props.history.push(`/articles/edit?id=${row._id}`);
-  };
-  const onDelete = async (row) => {
-    const result: any = await remove({
-      id: row._id,
-    });
-    if (result.code === 200) {
-      fetchData(1, 6, { status: 0 });
-      Message.success(result.msg);
-    } else {
-      Message.error('删除失败，请重试');
-    }
+    props.history.push(`/articles/edit?id=${row.id}`);
   };
 
-  const layout = {
-    labelCol: {
-      span: 8,
-    },
-    wrapperCol: {
-      span: 16,
-    },
+  const onDelete = async (id: number) => {
+    try {
+      await remove({ id });
+      fetchData(1, 6);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const getTags = async () => {
     const res: any = await getTagList({
       current: 1,
       size: 9999,
+      status: 1,
     });
-    // const list = res.data.list?.map(item => {
-    //   item.key = item._id
-    //   item.value = item.name
-    //   return item
-    // })
-    // setTagsArr(list)
+    const tagList = res.data.records.map((item) => ({
+      key: item.id,
+      value: item.name,
+    }));
+    setTagsArr(tagList);
   };
 
   const getCategories = async () => {
@@ -306,52 +289,56 @@ function Articles(props) {
       current: 1,
       size: 9999,
     });
-    // const list = res.data.list?.map(item => {
-    //   item.key = item._id
-    //   item.value = item.name
-    //   return item
-    // })
-    // setCategoriesArr(list)
+    const categoryList = res.data.records.map((item) => ({
+      key: item.id,
+      value: item.name,
+    }));
+    setCategoriesArr(categoryList);
   };
 
   const onSearch = async () => {
-    const values = await form.getFields();
-    const postData = values;
-    if (postData.tags) {
-      postData.tags = postData.tags.join(',');
+    const formData = form.getFields();
+    if (formData.categoryIds) {
+      formData.categoryIds = formData.categoryIds.join(',');
     }
-    if (postData.categories) {
-      postData.categories = postData.categories.join(',');
+    if (formData.tagIds) {
+      formData.tagIds = formData.tagIds.join(',');
     }
-    if (postData.createTime) {
-      postData.createStartTime = dayjs(postData.createTime[0]).unix();
-      postData.createEndTime = dayjs(postData.createTime[1]).unix();
-      delete postData.createTime;
-    }
-    if (postData.updateTime) {
-      postData.updateStartTime = dayjs(postData.updateTime[0]).unix();
-      postData.updateEndTime = dayjs(postData.updateTime[1]).unix();
-      delete postData.updateTime;
-    }
-    fetchData(1, pagination.pageSize, postData);
+    // if (postData.createTime) {
+    //   postData.createStartTime = dayjs(postData.createTime[0]).unix();
+    //   postData.createEndTime = dayjs(postData.createTime[1]).unix();
+    //   delete postData.createTime;
+    // }
+    // if (postData.updateTime) {
+    //   postData.updateStartTime = dayjs(postData.updateTime[0]).unix();
+    //   postData.updateEndTime = dayjs(postData.updateTime[1]).unix();
+    //   delete postData.updateTime;
+    // }
+    fetchData(1, pagination.pageSize, formData);
   };
 
   const onReset = () => {
     form.resetFields();
-    fetchData(1, 6, { status: 0 });
+    fetchData(1, 6);
   };
 
-  const handleUpdateCollectStatus = async (isCollect) => {
-    const result: any = await updateCollectStatus({
-      isCollect,
-    });
-    if (result.code === 200) {
-      fetchData(1, 6, { status: 0 });
-      Message.success(result.msg);
-    } else {
-      Message.error('一键操作失败，请重试');
-    }
+  const handleUpdateCollectStatus = async (isCollect: boolean) => {
+    // const result: any = await updateCollectStatus({
+    //   isCollect,
+    // });
+    // if (result.code === 200) {
+    //   fetchData(1, 6, { status: 0 });
+    //   Message.success(result.msg);
+    // } else {
+    //   Message.error('一键操作失败，请重试');
+    // }
   };
+
+  useEffect(() => {
+    getTags();
+    getCategories();
+    fetchData(1, 6);
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -378,8 +365,7 @@ function Articles(props) {
           style={{ marginBottom: 20 }}
           layout="horizontal"
           initialValues={{
-            categories: '',
-            status: '0',
+            status: '',
             publishStatus: '',
           }}
         >
@@ -390,7 +376,7 @@ function Articles(props) {
               </Form.Item>
             </Grid.Col>
             <Grid.Col span={6}>
-              <Form.Item field="categories" label="分类">
+              <Form.Item field="categoryIds" label="分类">
                 <Select placeholder="请选择分类" mode="multiple">
                   {categoriesArr.map((item) => (
                     <Select.Option key={item.key} value={item.key}>
@@ -401,7 +387,7 @@ function Articles(props) {
               </Form.Item>
             </Grid.Col>
             <Grid.Col span={6}>
-              <Form.Item field="tags" label="标签">
+              <Form.Item field="tagIds" label="标签">
                 <Select placeholder="请选择标签" mode="multiple">
                   {tagsArr.map((item) => (
                     <Select.Option key={item.key} value={item.key}>
@@ -414,7 +400,7 @@ function Articles(props) {
             <Grid.Col span={6}>
               <Form.Item field="status" label="文章状态">
                 <Select placeholder="请选择文章状态">
-                  {[{ key: '0', value: '全部' }, ...statusOptions].map(
+                  {[{ key: '', value: '全部' }, ...statusOptions].map(
                     (item) => (
                       <Select.Option key={item.key} value={item.key}>
                         {item.value}
@@ -429,7 +415,7 @@ function Articles(props) {
             <Grid.Col span={6}>
               <Form.Item field="publishStatus" label="发布状态">
                 <Select placeholder="请选择发布状态" defaultValue="">
-                  {[{ key: '0', value: '全部' }, ...publishStatusOptions].map(
+                  {[{ key: '', value: '全部' }, ...publishStatusOptions].map(
                     (item) => (
                       <Select.Option key={item.key} value={item.key}>
                         {item.value}
@@ -464,7 +450,7 @@ function Articles(props) {
           </Grid.Row>
         </Form>
         <Table
-          rowKey="_id"
+          rowKey="id"
           loading={loading}
           onChange={onChangeTable}
           pagination={pagination}
@@ -477,6 +463,6 @@ function Articles(props) {
       </Card>
     </div>
   );
-}
+};
 
 export default Articles;

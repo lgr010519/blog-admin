@@ -76,11 +76,11 @@ export const projects = [
 ];
 
 export const statusOptions = [
+  { key: '0', value: '停用' },
   { key: '1', value: '启用' },
-  { key: '2', value: '停用' },
 ];
 
 export const publishStatusOptions = [
+  { key: '0', value: '未发布' },
   { key: '1', value: '已发布' },
-  { key: '2', value: '未发布' },
 ];
