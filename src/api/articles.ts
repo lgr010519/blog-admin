@@ -24,10 +24,11 @@ export function updateStatus(data) {
   });
 }
 
-export function queryArticles(params) {
+export function getDetail(params) {
   return request({
-    url: `/articles/${params.id}/edit`,
+    url: `/admin/article/getDetail`,
     method: 'GET',
+    params,
   });
 }
 
@@ -36,5 +37,13 @@ export function remove(params) {
     url: '/admin/article/remove',
     method: 'DELETE',
     params,
+  });
+}
+
+export function updateCollectBatch(data) {
+  return request({
+    url: '/admin/article/updateCollectBatch',
+    method: 'POST',
+    data,
   });
 }

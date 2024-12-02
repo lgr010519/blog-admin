@@ -1,29 +1,28 @@
-import React, {useEffect} from 'react';
-import useLocale from "@/utils/useLocale";
+import React, { useEffect } from 'react';
+import useLocale from '@/utils/useLocale';
 import {
   Avatar,
   Button,
   Card,
-  Form,
-  Image,
   Input,
-  Message,
   Popconfirm,
-  Table, Tag, Tooltip
-} from "@arco-design/web-react";
-import styles from './style/index.module.less'
-import {useDispatch, useSelector} from "react-redux";
+  Table,
+  Tag,
+  Tooltip,
+} from '@arco-design/web-react';
+import styles from './style/index.module.less';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   UPDATE_FORM_PARAMS,
   UPDATE_LIST,
   UPDATE_LOADING,
-  UPDATE_PAGINATION
-} from './redux/actionTypes'
-import {getList, remove} from "@/api/user";
-import {ReducerState} from "@/redux";
+  UPDATE_PAGINATION,
+} from './redux/actionTypes';
+import { getList, remove } from '@/api/user';
+import { ReducerState } from '@/redux';
 
 function Categories() {
-  const locale = useLocale()
+  const locale = useLocale();
 
   const columns: any = [
     {
@@ -32,21 +31,18 @@ function Categories() {
       align: 'center',
       width: 100,
       fixed: 'left',
-      render: (_, record) => (
-        <span style={{fontSize: 18}}>{_}</span>
-      )
     },
     {
       title: '头像',
       dataIndex: 'avatar',
       align: 'center',
-      render: (_, record) => {
+      render: (avatar: string) => {
         return (
-          <Avatar shape='square' size={64}>
-            <img src={record.avatar}/>
+          <Avatar shape="square" size={64}>
+            <img src={avatar} alt="" />
           </Avatar>
-        )
-      }
+        );
+      },
     },
     {
       title: '来源',
@@ -55,34 +51,34 @@ function Categories() {
       width: 100,
     },
     {
-      title: 'Email',
+      title: '邮箱',
       dataIndex: 'email',
       align: 'center',
     },
     {
-      title: '收藏数量',
-      dataIndex: 'articleIds',
+      title: '收藏文章数量',
+      dataIndex: 'articleNum',
       align: 'center',
-      width: 90,
-      render: (_, record) => {
-        return (
-          <Tag color="orange">{record.articleIds?.length}</Tag>
-        )
-      }
+      width: 120,
+      render: (articleNum: number) => {
+        return <Tag color="orange">{articleNum}</Tag>;
+      },
     },
     {
       title: '简介',
       dataIndex: 'introduction',
       align: 'center',
-      render: (text) => {
+      render: (introduction: string) => {
         return (
-          <Tooltip content={text} position="tl">{text || '-'}</Tooltip>
-        )
-      }
+          <Tooltip content={introduction} position="tl">
+            {introduction || '-'}
+          </Tooltip>
+        );
+      },
     },
     {
       title: '注册时间',
-      dataIndex: 'registerTime',
+      dataIndex: 'createTime',
       align: 'center',
       width: 180,
     },
@@ -93,66 +89,89 @@ function Categories() {
       fixed: 'right',
       render: (_, record) => (
         <div className={styles.operations}>
-          <Popconfirm
-            title='确定删除吗?'
-            onOk={() => onDelete(record)}
-          >
+          <Popconfirm title="确定删除吗?" onOk={() => onDelete(record.id)}>
             <Button type="text" status="danger" size="small">
               删除
             </Button>
           </Popconfirm>
         </div>
-      )
+      ),
     },
-  ]
+  ];
 
-  const userState = useSelector((state: ReducerState) => state.user)
-  const {data, pagination, loading, formParams} = userState
-  const dispatch = useDispatch()
+  const userState = useSelector((state: ReducerState) => state.user);
+  const { data, pagination, loading, formParams } = userState;
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
-  async function fetchData(current = 1, pageSize = 6, params = {}) {
-    dispatch({type: UPDATE_LOADING, payload: {loading: true}})
+  const fetchData = async (current = 1, size = 6, params = {}) => {
+    dispatch({
+      type: UPDATE_LOADING,
+      payload: {
+        loading: true,
+      },
+    });
     try {
-      const result: any = await getList({
-        page: current,
-        pageSize,
+      const res: any = await getList({
+        current,
+        size,
         ...params,
-      })
-      if (result.code === 200) {
-        dispatch({type: UPDATE_LOADING, payload: {loading: false}})
-        dispatch({type: UPDATE_LIST, payload: {data: result.data.list}})
-        dispatch({
-          type: UPDATE_PAGINATION,
-          payload: {pagination: {...pagination, current, pageSize, total: result.data.totalCount}}
-        })
-        dispatch({type: UPDATE_FORM_PARAMS, payload: {params}})
-      }
-    } catch (e) {
-
+      });
+      dispatch({
+        type: UPDATE_LIST,
+        payload: {
+          data: res.data.records,
+        },
+      });
+      dispatch({
+        type: UPDATE_PAGINATION,
+        payload: {
+          pagination: {
+            ...pagination,
+            current,
+            pageSize: size,
+            total: res.data.total,
+          },
+        },
+      });
+      dispatch({
+        type: UPDATE_FORM_PARAMS,
+        payload: {
+          params,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch({
+        type: UPDATE_LOADING,
+        payload: {
+          loading: false,
+        },
+      });
     }
-  }
+  };
 
-  function onChangeTable(pagination) {
-    const {current, pageSize} = pagination
-    fetchData(current, pageSize, formParams)
-  }
+  const onChangeTable = (pagination: { current: number; pageSize: number }) => {
+    const { current, pageSize } = pagination;
+    fetchData(current, pageSize, formParams);
+  };
 
-  function onSearch(nickName) {
-    fetchData(1, pagination.pageSize, {nickName})
-  }
+  const onSearch = (nickName: string) => {
+    fetchData(1, pagination.pageSize, { nickName });
+  };
 
-  const onDelete = async (row) => {
-    const result: any = await remove(row)
-    if (result.code === 200) {
-      fetchData().then(Message.success(result.msg))
-    } else {
-      Message.error('删除失败，请重试')
+  const onDelete = async (id: number) => {
+    try {
+      await remove({ id });
+      fetchData(1, 6);
+    } catch (error) {
+      console.log(error);
     }
-  }
+  };
 
   return (
     <div className={styles.container}>
@@ -160,7 +179,7 @@ function Categories() {
         <div className={styles.toolbar}>
           <div>
             <Input.Search
-              style={{width: 300}}
+              style={{ width: 300 }}
               searchButton
               placeholder="请输入昵称"
               onSearch={onSearch}
@@ -177,7 +196,7 @@ function Categories() {
         />
       </Card>
     </div>
-  )
+  );
 }
 
-export default Categories
+export default Categories;

@@ -8,19 +8,22 @@ import {
   InputNumber,
   Message,
   Select,
+  Spin,
   Switch,
 } from '@arco-design/web-react';
 import Save from '@/components/Save';
 import UploadImage from '@/components/UploadImage';
-import { queryArticles, saveOrUpdate } from '@/api/articles';
+import { getDetail, saveOrUpdate } from '@/api/articles';
 import { getList as getCategoryList } from '@/api/categories';
 import { getList as getTagList } from '@/api/tags';
 import MdEditor from 'for-editor';
 import { useLocation } from 'react-router';
+import { fileUpload } from '@/api/fileUpload';
 
 const Edit = () => {
   const [form] = Form.useForm();
   const [time, setTime] = useState();
+  const [loading, setLoading] = useState(false);
   const layout = {
     labelCol: {
       span: 2,
@@ -70,7 +73,7 @@ const Edit = () => {
     values.cover = values.cover[0].imgUrl;
     values.publishStatus = publishStatus;
     values.status = 1;
-    id && (values.id = id);
+    id && (values.id = +id);
     try {
       await saveOrUpdate(values);
       Message.success(publishStatus ? '发布成功' : '保存成功');
@@ -82,19 +85,31 @@ const Edit = () => {
 
   const loadData = async (isRefresh?: boolean) => {
     if (!id) return;
-    const result: any = await queryArticles({ id });
-    if (isRefresh) {
-      Message.success('刷新成功');
+    setLoading(true);
+    try {
+      const res: any = await getDetail({ id });
+      const data = res.data;
+      if (!data) return;
+      data.cover = [
+        {
+          imgUrl: data.cover,
+        },
+      ];
+      data.isComment = Boolean(data.isComment);
+      data.isLike = Boolean(data.isLike);
+      data.isCollect = Boolean(data.isCollect);
+      data.tagIdList = data.tagsList.map((item) => item.id);
+      delete data.tagsList;
+      form.setFieldsValue(data);
+      setTime(data.updateTime);
+      if (isRefresh) {
+        Message.success('刷新成功');
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
-    const data = result.data;
-    if (!data) return;
-    data.cover = [
-      {
-        imgUrl: data.cover,
-      },
-    ];
-    form.setFieldsValue(data);
-    setTime(data.updateTime);
   };
 
   const getTags = async () => {
@@ -125,16 +140,12 @@ const Edit = () => {
   const addImg = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    // const result = await upload(formData)
-    const result = [
-      {
-        hash: 'afshjdvsadlkjfhsdajnv',
-        key: '390485734895731141.png',
-        url: 'http://localhost:3000',
-      },
-    ];
-    if (result) {
-      editorRef.current.$img2Url(file.name, result[0].url);
+    try {
+      const res = await fileUpload(formData);
+      editorRef.current.$img2Url(file.name, res[0].url);
+    } catch (error) {
+      console.log(error);
+      Message.error('图片上传失败，请重试');
     }
   };
 
@@ -147,153 +158,155 @@ const Edit = () => {
   return (
     <>
       <div className={styles.container}>
-        <Card hoverable>
-          <Form
-            {...layout}
-            form={form}
-            initialValues={{
-              isCollect: true,
-              isComment: true,
-              isLike: true,
-              views: 0,
-              like: 0,
-              collect: 0,
-              comment: 0,
-            }}
-          >
-            <Form.Item
-              label="文章标题"
-              field="title"
-              rules={[{ required: true, message: '请输入文章标题' }]}
+        <Spin loading={loading} style={{ display: 'block' }}>
+          <Card hoverable>
+            <Form
+              {...layout}
+              form={form}
+              initialValues={{
+                isCollect: true,
+                isComment: true,
+                isLike: true,
+                views: 0,
+                like: 0,
+                collect: 0,
+                comment: 0,
+              }}
             >
-              <Input placeholder="请输入文章标题" />
-            </Form.Item>
-            <Form.Item
-              label="文章简介"
-              field="introduction"
-              rules={[
-                { required: true, message: '请输入文章简介' },
-                { minLength: 10, message: '至少10个字符' },
-                { maxLength: 500, message: '不能超过500个字符' },
-              ]}
-            >
-              <Input.TextArea
-                rows={5}
-                minLength={10}
-                maxLength={500}
-                showWordLimit
-              />
-            </Form.Item>
-            <Grid.Row className="grid-demo" style={{ marginBottom: 16 }}>
-              <Grid.Col span={12}>
-                <Form.Item
-                  label="文章封面"
-                  field="cover"
-                  {...formItemLayout}
-                  rules={[{ required: true, message: '请上传文章封面' }]}
-                >
-                  <UploadImage showAction={false} showLink={false} />
-                </Form.Item>
-                <Form.Item
-                  field="categoryId"
-                  label="选择分类"
-                  {...formItemLayout}
-                  rules={[{ required: true, message: '请选择文章分类' }]}
-                >
-                  <Select placeholder="请选择文章分类" defaultValue="">
-                    {categoriesArr.map((item) => (
-                      <Select.Option key={item.key} value={item.key}>
-                        {item.value}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-                <Form.Item
-                  field="tagIdList"
-                  label="选择标签"
-                  {...formItemLayout}
-                  rules={[{ required: true, message: '请选择文章标签' }]}
-                >
-                  <Select placeholder="请选择文章标签" mode="multiple">
-                    {tagsArr.map((item) => (
-                      <Select.Option key={item.key} value={item.key}>
-                        {item.value}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Grid.Col>
-              <Grid.Col span={12}>
-                <Grid.Row>
-                  <Grid.Col span={8}>
-                    <Form.Item
-                      label="评论"
-                      layout="inline"
-                      field="isComment"
-                      triggerPropName="checked"
-                    >
-                      <Switch checkedText="显示" uncheckedText="隐藏" />
-                    </Form.Item>
-                    <Form.Item
-                      label="点赞"
-                      layout="inline"
-                      field="isLike"
-                      triggerPropName="checked"
-                    >
-                      <Switch checkedText="显示" uncheckedText="隐藏" />
-                    </Form.Item>
-                    <Form.Item
-                      label="收藏"
-                      layout="inline"
-                      field="isCollect"
-                      triggerPropName="checked"
-                    >
-                      <Switch checkedText="显示" uncheckedText="隐藏" />
-                    </Form.Item>
-                  </Grid.Col>
-                  <Grid.Col span={8}>
-                    <Form.Item
-                      label="查看数量"
-                      field="views"
-                      {...formItemLayout2}
-                      rules={[{ required: true, message: '请输入查看数量' }]}
-                    >
-                      <InputNumber placeholder="请输入" />
-                    </Form.Item>
-                    <Form.Item
-                      label="点赞数量"
-                      field="like"
-                      {...formItemLayout2}
-                      rules={[{ required: true, message: '请输入点赞数量' }]}
-                    >
-                      <InputNumber placeholder="请输入" />
-                    </Form.Item>
-                    <Form.Item
-                      label="收藏数量"
-                      field="collect"
-                      {...formItemLayout2}
-                      rules={[{ required: true, message: '请输入收藏数量' }]}
-                    >
-                      <InputNumber placeholder="请输入" />
-                    </Form.Item>
-                  </Grid.Col>
-                </Grid.Row>
-              </Grid.Col>
-            </Grid.Row>
-            <Form.Item
-              wrapperCol={{ span: 24 }}
-              field="content"
-              rules={[{ required: true, message: '请撰写文章' }]}
-            >
-              <MdEditor
-                ref={(el) => (editorRef.current = el)}
-                addImg={(file) => addImg(file)}
-                placeholder="请撰写文章..."
-                height="400px"
-              />
-            </Form.Item>
-          </Form>
-        </Card>
+              <Form.Item
+                label="文章标题"
+                field="title"
+                rules={[{ required: true, message: '请输入文章标题' }]}
+              >
+                <Input placeholder="请输入文章标题" />
+              </Form.Item>
+              <Form.Item
+                label="文章简介"
+                field="introduction"
+                rules={[
+                  { required: true, message: '请输入文章简介' },
+                  { minLength: 10, message: '至少10个字符' },
+                  { maxLength: 500, message: '不能超过500个字符' },
+                ]}
+              >
+                <Input.TextArea
+                  rows={5}
+                  minLength={10}
+                  maxLength={500}
+                  showWordLimit
+                />
+              </Form.Item>
+              <Grid.Row className="grid-demo" style={{ marginBottom: 16 }}>
+                <Grid.Col span={12}>
+                  <Form.Item
+                    label="文章封面"
+                    field="cover"
+                    {...formItemLayout}
+                    rules={[{ required: true, message: '请上传文章封面' }]}
+                  >
+                    <UploadImage showAction={false} showLink={false} />
+                  </Form.Item>
+                  <Form.Item
+                    field="categoryId"
+                    label="选择分类"
+                    {...formItemLayout}
+                    rules={[{ required: true, message: '请选择文章分类' }]}
+                  >
+                    <Select placeholder="请选择文章分类" defaultValue="">
+                      {categoriesArr.map((item) => (
+                        <Select.Option key={item.key} value={item.key}>
+                          {item.value}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                  <Form.Item
+                    field="tagIdList"
+                    label="选择标签"
+                    {...formItemLayout}
+                    rules={[{ required: true, message: '请选择文章标签' }]}
+                  >
+                    <Select placeholder="请选择文章标签" mode="multiple">
+                      {tagsArr.map((item) => (
+                        <Select.Option key={item.key} value={item.key}>
+                          {item.value}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Col>
+                <Grid.Col span={12}>
+                  <Grid.Row>
+                    <Grid.Col span={8}>
+                      <Form.Item
+                        label="评论"
+                        layout="inline"
+                        field="isComment"
+                        triggerPropName="checked"
+                      >
+                        <Switch checkedText="显示" uncheckedText="隐藏" />
+                      </Form.Item>
+                      <Form.Item
+                        label="点赞"
+                        layout="inline"
+                        field="isLike"
+                        triggerPropName="checked"
+                      >
+                        <Switch checkedText="显示" uncheckedText="隐藏" />
+                      </Form.Item>
+                      <Form.Item
+                        label="收藏"
+                        layout="inline"
+                        field="isCollect"
+                        triggerPropName="checked"
+                      >
+                        <Switch checkedText="显示" uncheckedText="隐藏" />
+                      </Form.Item>
+                    </Grid.Col>
+                    <Grid.Col span={8}>
+                      <Form.Item
+                        label="查看数量"
+                        field="views"
+                        {...formItemLayout2}
+                        rules={[{ required: true, message: '请输入查看数量' }]}
+                      >
+                        <InputNumber placeholder="请输入" />
+                      </Form.Item>
+                      <Form.Item
+                        label="点赞数量"
+                        field="like"
+                        {...formItemLayout2}
+                        rules={[{ required: true, message: '请输入点赞数量' }]}
+                      >
+                        <InputNumber placeholder="请输入" />
+                      </Form.Item>
+                      <Form.Item
+                        label="收藏数量"
+                        field="collect"
+                        {...formItemLayout2}
+                        rules={[{ required: true, message: '请输入收藏数量' }]}
+                      >
+                        <InputNumber placeholder="请输入" />
+                      </Form.Item>
+                    </Grid.Col>
+                  </Grid.Row>
+                </Grid.Col>
+              </Grid.Row>
+              <Form.Item
+                wrapperCol={{ span: 24 }}
+                field="content"
+                rules={[{ required: true, message: '请撰写文章' }]}
+              >
+                <MdEditor
+                  ref={(el) => (editorRef.current = el)}
+                  addImg={(file) => addImg(file)}
+                  placeholder="请撰写文章..."
+                  height="400px"
+                />
+              </Form.Item>
+            </Form>
+          </Card>
+        </Spin>
       </div>
       <Save
         time={time}

@@ -8,6 +8,7 @@ import {
   Form,
   Grid,
   Input,
+  Message,
   Popconfirm,
   Radio,
   Select,
@@ -23,7 +24,12 @@ import {
   UPDATE_LOADING,
   UPDATE_PAGINATION,
 } from './redux/actionTypes';
-import { getList, remove, updateStatus } from '@/api/articles';
+import {
+  getList,
+  remove,
+  updateCollectBatch,
+  updateStatus,
+} from '@/api/articles';
 import { getList as getTagList } from '@/api/tags';
 import { getList as getCategoryList } from '@/api/categories';
 import { ReducerState } from '@/redux';
@@ -53,7 +59,7 @@ const Articles = (props: { history: string[] }) => {
       dataIndex: 'cover',
       align: 'center',
       render: (cover: string) => (
-        <Avatar shape="square" size={64}>
+        <Avatar shape="square" size={100}>
           <img src={cover} alt="" />
         </Avatar>
       ),
@@ -150,7 +156,11 @@ const Articles = (props: { history: string[] }) => {
           </Button>
           {record.publishStatus === 0 && (
             <>
-              <Button onClick={() => onUpdate(record)} type="text" size="small">
+              <Button
+                onClick={() => onUpdate(record.id)}
+                type="text"
+                size="small"
+              >
                 修改
               </Button>
               <Popconfirm title="确定删除吗?" onOk={() => onDelete(record.id)}>
@@ -186,7 +196,6 @@ const Articles = (props: { history: string[] }) => {
         size,
         ...params,
       });
-      res.data.records = res.data.records.filter((item: any) => item !== null);
       dispatch({
         type: UPDATE_LIST,
         payload: {
@@ -249,7 +258,7 @@ const Articles = (props: { history: string[] }) => {
     }
   };
 
-  function onChangeTable(pagination) {
+  function onChangeTable(pagination: { current: number; pageSize: number }) {
     const { current, pageSize } = pagination;
     fetchData(current, pageSize, formParams);
   }
@@ -258,8 +267,8 @@ const Articles = (props: { history: string[] }) => {
     props.history.push(`/articles/edit`);
   };
 
-  const onUpdate = (row) => {
-    props.history.push(`/articles/edit?id=${row.id}`);
+  const onUpdate = (id: number) => {
+    props.history.push(`/articles/edit?id=${id}`);
   };
 
   const onDelete = async (id: number) => {
@@ -277,10 +286,12 @@ const Articles = (props: { history: string[] }) => {
       size: 9999,
       status: 1,
     });
-    const tagList = res.data.records.map((item) => ({
-      key: item.id,
-      value: item.name,
-    }));
+    const tagList = res.data.records.map(
+      (item: { id: number; name: string }) => ({
+        key: item.id,
+        value: item.name,
+      })
+    );
     setTagsArr(tagList);
   };
 
@@ -289,10 +300,12 @@ const Articles = (props: { history: string[] }) => {
       current: 1,
       size: 9999,
     });
-    const categoryList = res.data.records.map((item) => ({
-      key: item.id,
-      value: item.name,
-    }));
+    const categoryList = res.data.records.map(
+      (item: { id: number; name: string }) => ({
+        key: item.id,
+        value: item.name,
+      })
+    );
     setCategoriesArr(categoryList);
   };
 
@@ -304,16 +317,16 @@ const Articles = (props: { history: string[] }) => {
     if (formData.tagIds) {
       formData.tagIds = formData.tagIds.join(',');
     }
-    // if (postData.createTime) {
-    //   postData.createStartTime = dayjs(postData.createTime[0]).unix();
-    //   postData.createEndTime = dayjs(postData.createTime[1]).unix();
-    //   delete postData.createTime;
-    // }
-    // if (postData.updateTime) {
-    //   postData.updateStartTime = dayjs(postData.updateTime[0]).unix();
-    //   postData.updateEndTime = dayjs(postData.updateTime[1]).unix();
-    //   delete postData.updateTime;
-    // }
+    if (formData.createTime) {
+      formData.createTimeStart = formData.createTime[0];
+      formData.createTimeEnd = formData.createTime[1];
+      delete formData.createTime;
+    }
+    if (formData.updateTime) {
+      formData.updateTimeStart = formData.updateTime[0];
+      formData.updateTimeEnd = formData.updateTime[1];
+      delete formData.updateTime;
+    }
     fetchData(1, pagination.pageSize, formData);
   };
 
@@ -323,15 +336,16 @@ const Articles = (props: { history: string[] }) => {
   };
 
   const handleUpdateCollectStatus = async (isCollect: boolean) => {
-    // const result: any = await updateCollectStatus({
-    //   isCollect,
-    // });
-    // if (result.code === 200) {
-    //   fetchData(1, 6, { status: 0 });
-    //   Message.success(result.msg);
-    // } else {
-    //   Message.error('一键操作失败，请重试');
-    // }
+    try {
+      await updateCollectBatch({
+        isCollect: +isCollect,
+      });
+      Message.success('操作成功');
+      fetchData(1, 6);
+    } catch (error) {
+      console.log(error);
+      Message.error('操作失败，请稍后重试');
+    }
   };
 
   useEffect(() => {
