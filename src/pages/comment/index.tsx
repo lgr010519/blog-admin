@@ -1,39 +1,40 @@
-import React, {useEffect, useState} from 'react';
-import useLocale from "@/utils/useLocale";
+import React, { useEffect, useState } from 'react';
+import useLocale from '@/utils/useLocale';
 import {
   Badge,
   Button,
   Card,
   Form,
-  Image,
   Input,
-  Message, Modal,
-  Popconfirm, Radio, Select,
-  Table, Tag, Tooltip
-} from "@arco-design/web-react";
-import styles from './style/index.module.less'
-import {useDispatch, useSelector} from "react-redux";
+  Message,
+  Modal,
+  Popconfirm,
+  Radio,
+  Select,
+  Table,
+} from '@arco-design/web-react';
+import styles from './style/index.module.less';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   UPDATE_FORM_PARAMS,
   UPDATE_LIST,
   UPDATE_LOADING,
-  UPDATE_PAGINATION
-} from './redux/actionTypes'
-import {getList, remove, updateCommentStatus} from "@/api/comment";
-import {ReducerState} from "@/redux";
-import {auditStatusOptions} from "@/constant";
-import dayjs from "dayjs";
+  UPDATE_PAGINATION,
+} from './redux/actionTypes';
+import { getList, remove, updateCommentStatus } from '@/api/comment';
+import { ReducerState } from '@/redux';
+import { auditStatusOptions } from '@/constant';
 
 function Categories() {
-  const locale = useLocale()
+  const locale = useLocale();
   const [query, setQuery] = useState({
     articleTitle: '',
-    auditStatus: 0
-  })
-  const [form] = Form.useForm()
+    auditStatus: undefined,
+  });
+  const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [id, setId] = useState('')
+  const [id, setId] = useState('');
 
   const columns: any = [
     {
@@ -42,9 +43,6 @@ function Categories() {
       align: 'center',
       fixed: 'left',
       width: 180,
-      render: (_, record) => (
-        <span style={{fontSize: 18}}>{_}</span>
-      )
     },
     {
       title: '昵称',
@@ -61,40 +59,41 @@ function Categories() {
       dataIndex: 'targetReplayId',
       align: 'center',
       width: 110,
+      render: (targetReplayId: number) => targetReplayId || '-',
     },
     {
       title: '目标回复内容',
       dataIndex: 'targetReplayContent',
       align: 'center',
+      render: (targetReplayContent: number) => targetReplayContent || '-',
     },
     {
       title: '审核状态',
       dataIndex: 'auditStatus',
       align: 'center',
       render: (text) => {
-        const current = auditStatusOptions.filter(item => item.value === +text)
-        const obj = current[0]
+        const current = auditStatusOptions.filter(
+          (item) => item.value === +text
+        );
+        const obj = current[0];
         const enums = {
+          0: 'warning',
           1: 'success',
           2: 'error',
-          3: 'warning'
-        }
-        return (
-          <Badge status={enums[obj.value]} text={obj.label}/>
-        )
-      }
+        };
+        return <Badge status={enums[obj.value]} text={obj.label} />;
+      },
     },
     {
       title: '评论时间',
       dataIndex: 'commentTime',
       align: 'center',
-      render: (text) => dayjs(text * 1000).format('YYYY-MM-DD HH:mm:ss')
     },
     {
       title: '审核时间',
       dataIndex: 'auditTime',
       align: 'center',
-      render: (text) => dayjs(text * 1000).format('YYYY-MM-DD HH:mm:ss')
+      render: (auditTime: string) => auditTime || '-',
     },
     {
       title: '操作',
@@ -103,108 +102,137 @@ function Categories() {
       fixed: 'right',
       render: (_, record) => (
         <div className={styles.operations}>
-          <Button onClick={() => handleAudit(record)} type="text" status="success" size="small">审核</Button>
-          <Popconfirm
-            title='确定删除吗?'
-            onOk={() => onDelete(record)}
+          <Button
+            onClick={() => handleAudit(record)}
+            type="text"
+            status="success"
+            size="small"
           >
+            审核
+          </Button>
+          <Popconfirm title="确定删除吗?" onOk={() => onDelete(record)}>
             <Button type="text" status="danger" size="small">
               删除
             </Button>
           </Popconfirm>
         </div>
-      )
+      ),
     },
-  ]
+  ];
 
-  const commentState = useSelector((state: ReducerState) => state.comment)
-  const {data, pagination, loading, formParams} = commentState
-  const dispatch = useDispatch()
+  const commentState = useSelector((state: ReducerState) => state.comment);
+  const { data, pagination, loading, formParams } = commentState;
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    fetchData(1, pagination.pageSize, query)
-  }, [query])
+    fetchData(1, pagination.pageSize, query);
+  }, [query]);
 
-  async function fetchData(current = 1, pageSize = 6, params = {}) {
-    dispatch({type: UPDATE_LOADING, payload: {loading: true}})
+  async function fetchData(current = 1, size = 6, params = {}) {
+    dispatch({
+      type: UPDATE_LOADING,
+      payload: {
+        loading: true,
+      },
+    });
     try {
-      const result: any = await getList({
-        page: current,
-        pageSize,
+      const res: any = await getList({
+        current,
+        size,
         ...params,
-      })
-      if (result) {
-        dispatch({type: UPDATE_LOADING, payload: {loading: false}})
-        dispatch({type: UPDATE_LIST, payload: {data: result.data.list}})
-        dispatch({
-          type: UPDATE_PAGINATION,
-          payload: {pagination: {...pagination, current, pageSize, total: result.data.totalCount}}
-        })
-        dispatch({type: UPDATE_FORM_PARAMS, payload: {params}})
-      }
-    } catch (e) {
-
+      });
+      dispatch({
+        type: UPDATE_LOADING,
+        payload: {
+          loading: false,
+        },
+      });
+      dispatch({
+        type: UPDATE_LIST,
+        payload: {
+          data: res.data.records,
+        },
+      });
+      dispatch({
+        type: UPDATE_PAGINATION,
+        payload: {
+          pagination: {
+            ...pagination,
+            current,
+            pageSize: size,
+            total: res.data.count,
+          },
+        },
+      });
+      dispatch({
+        type: UPDATE_FORM_PARAMS,
+        payload: {
+          params,
+        },
+      });
+    } catch (error) {
+      console.log(error);
     }
   }
 
   function onChangeTable(pagination) {
-    const {current, pageSize} = pagination
-    fetchData(current, pageSize, formParams)
+    const { current, pageSize } = pagination;
+    fetchData(current, pageSize, formParams);
   }
 
   function onSearch(articleTitle) {
     setQuery({
       ...query,
-      articleTitle
-    })
+      articleTitle,
+    });
   }
 
   const onDelete = async (row) => {
-    const result: any = await remove(row)
+    const result: any = await remove(row);
     if (result.code === 200) {
-      fetchData()
-      Message.success(result.msg)
+      fetchData();
+      Message.success(result.msg);
     } else {
-      Message.error('删除失败，请重试')
+      Message.error('删除失败，请重试');
     }
-  }
+  };
 
-  const onSelectSearch = (auditStatus) => {
+  const onSelectSearch = (auditStatus: number) => {
     setQuery({
       ...query,
-      auditStatus
-    })
-  }
+      auditStatus,
+    });
+  };
 
   const handleAudit = (row) => {
-    setVisible(true)
-    setId(row._id)
-  }
+    setVisible(true);
+    setId(row._id);
+  };
 
   const onOk = async () => {
-    await form.validate()
-    setConfirmLoading(true)
-    const values = await form.getFields()
+    await form.validate();
+    setConfirmLoading(true);
+    const values = await form.getFields();
     const postData = {
       id,
-      ...values
-    }
-    const result: any = await updateCommentStatus(postData)
+      ...values,
+    };
+    const result: any = await updateCommentStatus(postData);
     if (result.code === 200) {
-      Message.success(result.msg)
-      fetchData()
-      setConfirmLoading(false)
-      onCancel()
+      Message.success(result.msg);
+      fetchData();
+      setConfirmLoading(false);
+      onCancel();
     } else {
-      Message.error('审核失败，请重试')
+      Message.error('审核失败，请重试');
     }
-  }
+  };
 
   const onCancel = () => {
-    setVisible(false)
-    form.resetFields()
-    setId('')
-  }
+    setVisible(false);
+    form.resetFields();
+    setId('');
+  };
 
   return (
     <div className={styles.container}>
@@ -212,15 +240,15 @@ function Categories() {
         <div className={styles.toolbar}>
           <div>
             <Input.Search
-              style={{width: 300}}
+              style={{ width: 300 }}
               searchButton
               placeholder="请输入文章标题"
               onSearch={onSearch}
             />
             <Select
               defaultValue={0}
-              placeholder='请选择审核状态'
-              style={{width: 160, marginLeft: 20, marginRight: 20}}
+              placeholder="请选择审核状态"
+              style={{ width: 160, marginLeft: 20, marginRight: 20 }}
               onChange={onSelectSearch}
             >
               {auditStatusOptions.map((option) => (
@@ -229,7 +257,9 @@ function Categories() {
                 </Select.Option>
               ))}
             </Select>
-            <Button type="primary" onClick={() => handleAudit({_id: 0})}>一键审核</Button>
+            <Button type="primary" onClick={() => handleAudit({ _id: 0 })}>
+              一键审核
+            </Button>
           </div>
         </div>
         <Table
@@ -239,19 +269,21 @@ function Categories() {
           pagination={pagination}
           columns={columns}
           data={data}
-          scroll={{x: 1600}}
+          scroll={{ x: 1600 }}
         />
         <Modal
-          title='审核'
+          title="审核"
           visible={visible}
           onOk={onOk}
           confirmLoading={confirmLoading}
           onCancel={onCancel}
         >
-          <Form
-            form={form}
-          >
-            <Form.Item label='审核状态' field='auditStatus' rules={[{required: true, message: '请选择审核状态'}]}>
+          <Form form={form}>
+            <Form.Item
+              label="审核状态"
+              field="auditStatus"
+              rules={[{ required: true, message: '请选择审核状态' }]}
+            >
               <Radio.Group>
                 <Radio value={1}>通过</Radio>
                 <Radio value={2}>驳回</Radio>
@@ -261,7 +293,7 @@ function Categories() {
         </Modal>
       </Card>
     </div>
-  )
+  );
 }
 
-export default Categories
+export default Categories;

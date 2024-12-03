@@ -20,7 +20,7 @@ export const auditStatusOptions = [
   // 0=全部，1=通过，2=驳回，3=未审核
   {
     value: 0,
-    label: '全部',
+    label: '未审核',
   },
   {
     value: 1,
@@ -29,10 +29,6 @@ export const auditStatusOptions = [
   {
     value: 2,
     label: '驳回',
-  },
-  {
-    value: 3,
-    label: '未审核',
   },
 ];
 
