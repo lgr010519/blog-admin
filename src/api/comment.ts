@@ -8,18 +8,18 @@ export function getList(params) {
   });
 }
 
-export function updateCommentStatus(data) {
+export function updateStatus(params) {
   return request({
-    url: '/comment',
-    method: 'PUT',
-    data,
+    url: '/admin/comment/updateStatus',
+    method: 'GET',
+    params,
   });
 }
 
-export function remove(data) {
+export function remove(params) {
   return request({
-    url: '/comment',
+    url: '/admin/comment/remove',
     method: 'DELETE',
-    data,
+    params,
   });
 }

@@ -6,7 +6,6 @@ import {
   Card,
   Form,
   Input,
-  Message,
   Modal,
   Popconfirm,
   Radio,
@@ -21,22 +20,29 @@ import {
   UPDATE_LOADING,
   UPDATE_PAGINATION,
 } from './redux/actionTypes';
-import { getList, remove, updateCommentStatus } from '@/api/comment';
+import { getList, remove, updateStatus } from '@/api/comment';
 import { ReducerState } from '@/redux';
 import { auditStatusOptions } from '@/constant';
 
 function Categories() {
   const locale = useLocale();
   const [query, setQuery] = useState({
-    articleTitle: '',
+    articleTitle: undefined,
     auditStatus: undefined,
   });
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [id, setId] = useState('');
+  const [id, setId] = useState(null);
 
   const columns: any = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      align: 'center',
+      fixed: 'left',
+      width: 80,
+    },
     {
       title: '文章标题',
       dataIndex: 'articleTitle',
@@ -71,9 +77,9 @@ function Categories() {
       title: '审核状态',
       dataIndex: 'auditStatus',
       align: 'center',
-      render: (text) => {
+      render: (auditStatus: string | number) => {
         const current = auditStatusOptions.filter(
-          (item) => item.value === +text
+          (item) => item.value === +auditStatus
         );
         const obj = current[0];
         const enums = {
@@ -103,14 +109,14 @@ function Categories() {
       render: (_, record) => (
         <div className={styles.operations}>
           <Button
-            onClick={() => handleAudit(record)}
+            onClick={() => handleAudit(record.id)}
             type="text"
             status="success"
             size="small"
           >
             审核
           </Button>
-          <Popconfirm title="确定删除吗?" onOk={() => onDelete(record)}>
+          <Popconfirm title="确定删除吗?" onOk={() => onDelete(record.id)}>
             <Button type="text" status="danger" size="small">
               删除
             </Button>
@@ -124,11 +130,7 @@ function Categories() {
   const { data, pagination, loading, formParams } = commentState;
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    fetchData(1, pagination.pageSize, query);
-  }, [query]);
-
-  async function fetchData(current = 1, size = 6, params = {}) {
+  const fetchData = async (current = 1, size = 20, params = {}) => {
     dispatch({
       type: UPDATE_LOADING,
       payload: {
@@ -140,12 +142,6 @@ function Categories() {
         current,
         size,
         ...params,
-      });
-      dispatch({
-        type: UPDATE_LOADING,
-        payload: {
-          loading: false,
-        },
       });
       dispatch({
         type: UPDATE_LIST,
@@ -160,7 +156,7 @@ function Categories() {
             ...pagination,
             current,
             pageSize: size,
-            total: res.data.count,
+            total: res.data.total,
           },
         },
       });
@@ -172,28 +168,38 @@ function Categories() {
       });
     } catch (error) {
       console.log(error);
+    } finally {
+      dispatch({
+        type: UPDATE_LOADING,
+        payload: {
+          loading: false,
+        },
+      });
     }
-  }
+  };
 
-  function onChangeTable(pagination) {
+  const onChangeTable = (pagination: { current: number; pageSize: number }) => {
     const { current, pageSize } = pagination;
     fetchData(current, pageSize, formParams);
-  }
+  };
 
-  function onSearch(articleTitle) {
+  function onSearch(articleTitle: string) {
     setQuery({
+      ...query,
+      articleTitle,
+    });
+    fetchData(1, pagination.pageSize, {
       ...query,
       articleTitle,
     });
   }
 
-  const onDelete = async (row) => {
-    const result: any = await remove(row);
-    if (result.code === 200) {
+  const onDelete = async (commentId: number) => {
+    try {
+      await remove({ id: commentId });
       fetchData();
-      Message.success(result.msg);
-    } else {
-      Message.error('删除失败，请重试');
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -202,37 +208,44 @@ function Categories() {
       ...query,
       auditStatus,
     });
+    fetchData(1, pagination.pageSize, {
+      ...query,
+      auditStatus,
+    });
   };
 
-  const handleAudit = (row) => {
+  const handleAudit = (commentId: number) => {
     setVisible(true);
-    setId(row._id);
+    setId(commentId);
   };
 
   const onOk = async () => {
     await form.validate();
     setConfirmLoading(true);
-    const values = await form.getFields();
-    const postData = {
+    const formData = {
       id,
-      ...values,
+      ...form.getFields(),
     };
-    const result: any = await updateCommentStatus(postData);
-    if (result.code === 200) {
-      Message.success(result.msg);
-      fetchData();
-      setConfirmLoading(false);
+    try {
+      await updateStatus(formData);
       onCancel();
-    } else {
-      Message.error('审核失败，请重试');
+      fetchData();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setConfirmLoading(false);
     }
   };
 
   const onCancel = () => {
     setVisible(false);
     form.resetFields();
-    setId('');
+    setId(null);
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -246,7 +259,7 @@ function Categories() {
               onSearch={onSearch}
             />
             <Select
-              defaultValue={0}
+              defaultValue={''}
               placeholder="请选择审核状态"
               style={{ width: 160, marginLeft: 20, marginRight: 20 }}
               onChange={onSelectSearch}
@@ -257,13 +270,13 @@ function Categories() {
                 </Select.Option>
               ))}
             </Select>
-            <Button type="primary" onClick={() => handleAudit({ _id: 0 })}>
+            <Button type="primary" onClick={() => handleAudit(-1)}>
               一键审核
             </Button>
           </div>
         </div>
         <Table
-          rowKey={`_id${Math.floor(Math.random() * 10)}`}
+          rowKey="id"
           loading={loading}
           onChange={onChangeTable}
           pagination={pagination}

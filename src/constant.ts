@@ -17,7 +17,11 @@ export const colors = [
 export const imagesType = ['image/jpg', 'image/png', 'image/jpeg', 'image/gif'];
 
 export const auditStatusOptions = [
-  // 0=全部，1=通过，2=驳回，3=未审核
+  // 0=未审核，1=通过，2=驳回
+  {
+    value: '',
+    label: '全部',
+  },
   {
     value: 0,
     label: '未审核',
