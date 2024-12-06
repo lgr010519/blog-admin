@@ -26,14 +26,6 @@ import { auditStatusOptions } from '@/constant';
 
 function Categories() {
   const locale = useLocale();
-  const [query, setQuery] = useState({
-    articleTitle: undefined,
-    auditStatus: undefined,
-  });
-  const [form] = Form.useForm();
-  const [visible, setVisible] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
-  const [id, setId] = useState(null);
 
   const columns: any = [
     {
@@ -129,6 +121,15 @@ function Categories() {
   const commentState = useSelector((state: ReducerState) => state.comment);
   const { data, pagination, loading, formParams } = commentState;
   const dispatch = useDispatch();
+  const [form] = Form.useForm();
+
+  const [query, setQuery] = useState({
+    articleTitle: undefined,
+    auditStatus: undefined,
+  });
+  const [visible, setVisible] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [id, setId] = useState(null);
 
   const fetchData = async (current = 1, size = 20, params = {}) => {
     dispatch({
@@ -197,7 +198,7 @@ function Categories() {
   const onDelete = async (commentId: number) => {
     try {
       await remove({ id: commentId });
-      fetchData();
+      fetchData(pagination.current, pagination.pageSize, formParams);
     } catch (error) {
       console.log(error);
     }
@@ -229,7 +230,7 @@ function Categories() {
     try {
       await updateStatus(formData);
       onCancel();
-      fetchData();
+      fetchData(pagination.current, pagination.pageSize, formParams);
     } catch (error) {
       console.log(error);
     } finally {

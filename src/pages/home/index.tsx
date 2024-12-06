@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Card, Grid } from '@arco-design/web-react';
 import {
+  Axis,
   Chart,
   Coordinate,
   getTheme,
@@ -8,16 +9,18 @@ import {
   Interval,
   Legend,
   Line,
+  LineAdvance,
 } from 'bizcharts';
 import styles from './style/index.module.less';
-import { getList, getTagList } from '@/api/home';
-import { getList as getUserList } from '@/api/user';
+import { getUserGrowthList } from '@/api/home';
+import { getList as getCategoryList } from '@/api/categories';
+import { getList as getTagList } from '@/api/tags';
 import { useDispatch, useSelector } from 'react-redux';
 import { ReducerState } from '@/redux';
 import {
   UPDATE_ARTICLE_NUM_BY_CATEGORIES,
   UPDATE_ARTICLE_NUM_BY_TAGS,
-  UPDATE_USER_NUM,
+  UPDATE_USER_GROWTH_DATA,
 } from '@/pages/home/redux/actionTypes';
 
 const Home = () => {
@@ -25,7 +28,8 @@ const Home = () => {
   const Col = Grid.Col;
 
   const HomeState = useSelector((state: ReducerState) => state.home);
-  const { userNum, articleNumByCategories, articleNumByTags } = HomeState;
+  const { userGrowthData, articleNumByCategories, articleNumByTags } =
+    HomeState;
   const dispatch = useDispatch();
 
   const data = [
@@ -43,45 +47,62 @@ const Home = () => {
     { month: '2023-06-01', acc: 35 },
   ];
 
-  const getUserNumData = async () => {
-    const res: any = await getUserList({
-      current: 1,
-      size: 9999,
-    });
-    dispatch({
-      type: UPDATE_USER_NUM,
-      payload: { userNum: res.data.records },
-    });
+  const getUserGrowthData = async () => {
+    try {
+      const res: any = await getUserGrowthList();
+      const handleRes = res.data.map(
+        (item: { period: string; userNum: number }) => ({
+          date: item.period.split(' ')[1],
+          value: item.userNum,
+        })
+      );
+      dispatch({
+        type: UPDATE_USER_GROWTH_DATA,
+        payload: {
+          userGrowthData: handleRes,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const getArticleNumByCategories = async () => {
-    const res: any = await getList({
-      page: 1,
-      pageSize: 9999,
-    });
-    if (res.code === 200) {
+    try {
+      const res: any = await getCategoryList({
+        current: 1,
+        size: -1,
+      });
       dispatch({
         type: UPDATE_ARTICLE_NUM_BY_CATEGORIES,
-        payload: { articleNumByCategories: res.data.list },
+        payload: {
+          articleNumByCategories: res.data.records,
+        },
       });
+    } catch (error) {
+      console.log(error);
     }
   };
 
   const getListByTag = async () => {
-    const res: any = await getTagList({
-      page: 1,
-      pageSize: 9999,
-    });
-    if (res.code === 200) {
+    try {
+      const res: any = await getTagList({
+        current: 1,
+        size: -1,
+      });
       dispatch({
         type: UPDATE_ARTICLE_NUM_BY_TAGS,
-        payload: { articleNumByTags: res.data.list },
+        payload: {
+          articleNumByTags: res.data.records,
+        },
       });
+    } catch (error) {
+      console.log(error);
     }
   };
 
   useEffect(() => {
-    getUserNumData();
+    getUserGrowthData();
     getArticleNumByCategories();
     getListByTag();
   }, []);
@@ -90,16 +111,11 @@ const Home = () => {
     <div className={styles.page}>
       <Row gutter={14}>
         <Col span={9}>
-          <Card title="用户统计" style={{ height: 306 }}>
-            <div className={styles.box}>
-              {userNum?.map((item) => (
-                <div key={item.id} className={styles.boxItem}>
-                  <span className={styles.boxItemSpan}>{item.nickName}</span>
-                  <br />
-                  {item.email}
-                </div>
-              ))}
-            </div>
+          <Card title="用户增长统计" style={{ height: 306 }}>
+            <Chart autoFit height={220} data={userGrowthData}>
+              <LineAdvance shape="smooth" position="date*value" point area />
+              <Axis name="sold" />
+            </Chart>
           </Card>
         </Col>
         <Col span={15}>
@@ -182,13 +198,7 @@ const Home = () => {
       <Row gutter={14} style={{ marginTop: 14 }}>
         <Col span={24}>
           <Card title="客户端访问量统计">
-            <Chart
-              scale={{ value: { min: 0 } }}
-              padding={[10, 20, 50, 40]}
-              autoFit
-              height={200}
-              data={data}
-            >
+            <Chart autoFit height={200} data={data}>
               <Line
                 shape="smooth"
                 position="month*acc"

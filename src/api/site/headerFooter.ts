@@ -1,24 +1,16 @@
-import {request} from "@/api/request";
+import { request } from '@/api/request';
 
-export function queryHeaderFooter(){
-    return request({
-        url: '/config/hf',
-        method: 'GET',
-    })
+export function getData() {
+  return request({
+    url: '/admin/config/hf/getData',
+    method: 'GET',
+  });
 }
 
-export function addHeaderFooter(data){
-    return request({
-        url: '/config/hf',
-        method: 'POST',
-        data,
-    })
-}
-
-export function updateHeaderFooter(data){
-    return request({
-        url: '/config/hf',
-        method: 'PUT',
-        data,
-    })
+export function saveOrUpdate(data) {
+  return request({
+    url: '/admin/config/hf/saveOrUpdate',
+    method: 'POST',
+    data,
+  });
 }

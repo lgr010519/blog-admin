@@ -67,9 +67,9 @@ const Edit = () => {
   const onSave = async (publishStatus: number) => {
     await form.validate();
     const values = form.getFields();
-    values.isComment = values.isComment ? 1 : 0;
-    values.isLike = values.isLike ? 1 : 0;
-    values.isCollect = values.isCollect ? 1 : 0;
+    values.isComment = +values.isComment;
+    values.isLike = +values.isLike;
+    values.isCollect = +values.isCollect;
     values.cover = values.cover[0].imgUrl;
     values.publishStatus = publishStatus;
     values.status = 1;
@@ -98,7 +98,7 @@ const Edit = () => {
       data.isComment = Boolean(data.isComment);
       data.isLike = Boolean(data.isLike);
       data.isCollect = Boolean(data.isCollect);
-      data.tagIdList = data.tagsList.map((item) => item.id);
+      data.tagIdList = data.tagsList.map((item: { id: number }) => item.id);
       delete data.tagsList;
       form.setFieldsValue(data);
       setTime(data.updateTime);
@@ -115,25 +115,29 @@ const Edit = () => {
   const getTags = async () => {
     const res: any = await getTagList({
       current: 1,
-      size: 9999,
+      size: -1,
       status: 1,
     });
-    const tagList = res.data.records.map((item) => ({
-      key: item.id,
-      value: item.name,
-    }));
+    const tagList = res.data.records.map(
+      (item: { id: number; name: string }) => ({
+        key: item.id,
+        value: item.name,
+      })
+    );
     setTagsArr(tagList);
   };
 
   const getCategories = async () => {
     const res: any = await getCategoryList({
       current: 1,
-      size: 9999,
+      size: -1,
     });
-    const categoryList = res.data.records.map((item) => ({
-      key: item.id,
-      value: item.name,
-    }));
+    const categoryList = res.data.records.map(
+      (item: { id: number; name: string }) => ({
+        key: item.id,
+        value: item.name,
+      })
+    );
     setCategoriesArr(categoryList);
   };
 
@@ -170,7 +174,6 @@ const Edit = () => {
                 views: 0,
                 like: 0,
                 collect: 0,
-                comment: 0,
               }}
             >
               <Form.Item

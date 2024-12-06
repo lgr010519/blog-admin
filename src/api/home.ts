@@ -1,24 +1,8 @@
-import {request} from "@/api/request";
+import { request } from '@/api/request';
 
-export function getUserNum(){
+export function getUserGrowthList() {
   return request({
-    url: '/user/userNum',
+    url: '/admin/home/getUserGrowthList',
     method: 'GET',
-  })
-}
-
-export function getList(params){
-  return request({
-    url: '/categories',
-    method: 'GET',
-    params
-  })
-}
-
-export function getTagList(params){
-  return request({
-    url: '/tags',
-    method: 'GET',
-    params,
-  })
+  });
 }

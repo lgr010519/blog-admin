@@ -12,9 +12,9 @@ const initialState = {
   data: [],
   pagination: {
     current: 1,
-    size: 10,
+    pageSize: 20,
     showTotal: true,
-    sizeCanChange: false,
+    sizeCanChange: true,
     pageSizeChangeResetCurrent: true,
   },
   loading: true,

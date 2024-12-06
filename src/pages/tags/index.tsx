@@ -26,7 +26,15 @@ import { IconCheck, IconClose } from '@arco-design/web-react/icon';
 
 export default function Tags() {
   const locale = useLocale();
-  const [title, setTitle] = useState('添加标签');
+
+  const formItemLayout = {
+    labelCol: {
+      span: 5,
+    },
+    wrapperCol: {
+      span: 19,
+    },
+  };
 
   const columns: any = [
     {
@@ -60,13 +68,13 @@ export default function Tags() {
       title: '创建时间',
       dataIndex: 'createTime',
       align: 'center',
-      render: (_) => <span>{_ || '-'}</span>,
+      render: (createTime: string) => createTime || '-',
     },
     {
       title: '修改时间',
       dataIndex: 'updateTime',
       align: 'center',
-      render: (_) => <span>{_ || '-'}</span>,
+      render: (updateTime: string) => updateTime || '-',
     },
     {
       title: '操作',
@@ -106,26 +114,15 @@ export default function Tags() {
   const { data, pagination, loading, formParams, visible, confirmLoading } =
     tagsState;
   const dispatch = useDispatch();
-
-  const formItemLayout = {
-    labelCol: {
-      span: 5,
-    },
-    wrapperCol: {
-      span: 19,
-    },
-  };
-
   const [form] = Form.useForm();
+  const [title, setTitle] = useState('添加标签');
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async (current = 1, size = 10, params = {}) => {
+  const fetchData = async (current = 1, size = 20, params = {}) => {
     dispatch({
       type: UPDATE_LOADING,
-      payload: { loading: true },
+      payload: {
+        loading: true,
+      },
     });
     try {
       const res: any = await getList({
@@ -135,7 +132,9 @@ export default function Tags() {
       });
       dispatch({
         type: UPDATE_LIST,
-        payload: { data: res.data.records },
+        payload: {
+          data: res.data.records,
+        },
       });
       dispatch({
         type: UPDATE_PAGINATION,
@@ -143,21 +142,25 @@ export default function Tags() {
           pagination: {
             ...pagination,
             current,
-            size,
+            pageSize: size,
             total: res.data.total,
           },
         },
       });
       dispatch({
         type: UPDATE_FORM_PARAMS,
-        payload: { params },
+        payload: {
+          params,
+        },
       });
     } catch (error) {
       console.log(error);
     } finally {
       dispatch({
         type: UPDATE_LOADING,
-        payload: { loading: false },
+        payload: {
+          loading: false,
+        },
       });
     }
   };
@@ -214,7 +217,7 @@ export default function Tags() {
     try {
       await saveOrUpdate(data);
       onCancel();
-      fetchData();
+      fetchData(pagination.current, pagination.pageSize, formParams);
     } catch (error) {
       console.log(error);
     } finally {
@@ -230,7 +233,7 @@ export default function Tags() {
   const onDelete = async (id: number) => {
     try {
       await remove({ id });
-      fetchData();
+      fetchData(pagination.current, pagination.pageSize, formParams);
     } catch (error) {
       console.log(error);
     }
@@ -245,11 +248,15 @@ export default function Tags() {
         id: row.id,
         status: row.status ? 0 : 1,
       });
-      fetchData();
+      fetchData(pagination.current, pagination.pageSize, formParams);
     } catch (error) {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -278,7 +285,7 @@ export default function Tags() {
           data={data}
           scroll={{
             x: 1000,
-            y: 400,
+            y: 570,
           }}
         />
         <Modal

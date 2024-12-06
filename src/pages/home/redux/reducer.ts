@@ -1,21 +1,19 @@
 import {
   UPDATE_ARTICLE_NUM_BY_CATEGORIES,
   UPDATE_ARTICLE_NUM_BY_TAGS,
-  UPDATE_USER_NUM,
+  UPDATE_USER_GROWTH_DATA,
 } from '@/pages/home/redux/actionTypes';
 
 const initialState = {
-  userNum: [],
+  userGrowthData: [],
   articleNumByCategories: [],
   articleNumByTags: [],
 };
 
 export interface HomeState {
-  userNum: Array<{
-    id: number;
-    nickName: string;
-    email: string;
-    createTime: string;
+  userGrowthData: Array<{
+    date: string;
+    userNum: number;
   }>;
   articleNumByCategories: Array<{
     name: string;
@@ -29,11 +27,11 @@ export interface HomeState {
 
 export default function (state = initialState, action) {
   switch (action.type) {
-    case UPDATE_USER_NUM: {
-      const { userNum } = action.payload;
+    case UPDATE_USER_GROWTH_DATA: {
+      const { userGrowthData } = action.payload;
       return {
         ...state,
-        userNum,
+        userGrowthData,
       };
     }
     case UPDATE_ARTICLE_NUM_BY_CATEGORIES: {

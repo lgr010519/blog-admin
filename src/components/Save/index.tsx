@@ -13,7 +13,7 @@ import { ReducerState } from '@/redux';
 
 const Save = (props) => {
   const { time, showBack, onBack, onRefresh, onSave, onPublish } = props;
-  const message = time ? `上次保存时间：${time}` : '暂无操作';
+  const message = time ? `上次更新时间：${time}` : '暂无操作';
   const goBack = () => {
     history.go(-1);
   };

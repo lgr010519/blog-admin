@@ -9,7 +9,7 @@ import {
 const initialState = {
   data: [],
   pagination: {
-    sizeCanChange: false,
+    sizeCanChange: true,
     showTotal: true,
     pageSize: 20,
     current: 1,

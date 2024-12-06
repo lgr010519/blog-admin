@@ -183,7 +183,7 @@ const Articles = (props: { history: string[] }) => {
   const [tagsArr, setTagsArr] = useState([]);
   const [categoriesArr, setCategoriesArr] = useState([]);
 
-  const fetchData = async (current = 1, size = 6, params = {}) => {
+  const fetchData = async (current = 1, size = 10, params = {}) => {
     dispatch({
       type: UPDATE_LOADING,
       payload: {
@@ -237,7 +237,7 @@ const Articles = (props: { history: string[] }) => {
         id: record.id,
         status: checked ? 1 : 0,
       });
-      fetchData(1, 6);
+      fetchData(pagination.current, pagination.pageSize, formParams);
     } catch (error) {
       console.log(error);
     }
@@ -252,7 +252,7 @@ const Articles = (props: { history: string[] }) => {
         id: record.id,
         publishStatus: record.publishStatus ? 0 : 1,
       });
-      fetchData(1, 6);
+      fetchData(pagination.current, pagination.pageSize, formParams);
     } catch (error) {
       console.log(error);
     }
@@ -274,7 +274,7 @@ const Articles = (props: { history: string[] }) => {
   const onDelete = async (id: number) => {
     try {
       await remove({ id });
-      fetchData(1, 6);
+      fetchData(pagination.current, pagination.pageSize, formParams);
     } catch (error) {
       console.log(error);
     }
@@ -283,7 +283,7 @@ const Articles = (props: { history: string[] }) => {
   const getTags = async () => {
     const res: any = await getTagList({
       current: 1,
-      size: 9999,
+      size: -1,
       status: 1,
     });
     const tagList = res.data.records.map(
@@ -298,7 +298,7 @@ const Articles = (props: { history: string[] }) => {
   const getCategories = async () => {
     const res: any = await getCategoryList({
       current: 1,
-      size: 9999,
+      size: -1,
     });
     const categoryList = res.data.records.map(
       (item: { id: number; name: string }) => ({
@@ -332,7 +332,7 @@ const Articles = (props: { history: string[] }) => {
 
   const onReset = () => {
     form.resetFields();
-    fetchData(1, 6);
+    fetchData(1, pagination.pageSize);
   };
 
   const handleUpdateCollectStatus = async (isCollect: boolean) => {
@@ -341,7 +341,7 @@ const Articles = (props: { history: string[] }) => {
         isCollect: +isCollect,
       });
       Message.success('操作成功');
-      fetchData(1, 6);
+      fetchData(1, pagination.pageSize, formParams);
     } catch (error) {
       console.log(error);
       Message.error('操作失败，请稍后重试');
@@ -351,7 +351,7 @@ const Articles = (props: { history: string[] }) => {
   useEffect(() => {
     getTags();
     getCategories();
-    fetchData(1, 6);
+    fetchData();
   }, []);
 
   return (

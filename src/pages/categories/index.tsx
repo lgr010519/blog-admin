@@ -25,6 +25,15 @@ import { ReducerState } from '@/redux';
 export default function Categories() {
   const locale = useLocale();
 
+  const formItemLayout = {
+    labelCol: {
+      span: 5,
+    },
+    wrapperCol: {
+      span: 19,
+    },
+  };
+
   const columns: any = [
     {
       title: '分类名称',
@@ -42,13 +51,13 @@ export default function Categories() {
       title: '创建时间',
       dataIndex: 'createTime',
       align: 'center',
-      render: (_) => <span>{_ || '-'}</span>,
+      render: (createTime: string) => createTime || '-',
     },
     {
       title: '修改时间',
       dataIndex: 'updateTime',
       align: 'center',
-      render: (_) => <span>{_ || '-'}</span>,
+      render: (updateTime: string) => updateTime || '-',
     },
     {
       title: '操作',
@@ -80,28 +89,16 @@ export default function Categories() {
   const { data, pagination, loading, formParams, visible, confirmLoading } =
     CategoriesState;
   const dispatch = useDispatch();
+  const [form] = Form.useForm();
   const [addOrUpdate, setAddOrUpdate] = useState('');
   const [categoryId, setCategoryId] = useState(null);
 
-  const formItemLayout = {
-    labelCol: {
-      span: 5,
-    },
-    wrapperCol: {
-      span: 19,
-    },
-  };
-
-  const [form] = Form.useForm();
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async (current = 1, size = 10, params = {}) => {
+  const fetchData = async (current = 1, size = 20, params = {}) => {
     dispatch({
       type: UPDATE_LOADING,
-      payload: { loading: true },
+      payload: {
+        loading: true,
+      },
     });
     try {
       const res: any = await getList({
@@ -111,7 +108,9 @@ export default function Categories() {
       });
       dispatch({
         type: UPDATE_LIST,
-        payload: { data: res.data.records },
+        payload: {
+          data: res.data.records,
+        },
       });
       dispatch({
         type: UPDATE_PAGINATION,
@@ -119,35 +118,39 @@ export default function Categories() {
           pagination: {
             ...pagination,
             current,
-            size,
+            pageSize: size,
             total: res.data.total,
           },
         },
       });
       dispatch({
         type: UPDATE_FORM_PARAMS,
-        payload: { params },
+        payload: {
+          params,
+        },
       });
     } catch (error) {
       console.log(error);
     } finally {
       dispatch({
         type: UPDATE_LOADING,
-        payload: { loading: false },
+        payload: {
+          loading: false,
+        },
       });
     }
   };
 
-  const onChangeTable = (pagination) => {
+  const onChangeTable = (pagination: { current: number; pageSize: number }) => {
     const { current, pageSize } = pagination;
     fetchData(current, pageSize, formParams);
   };
 
-  const onSearch = (name) => {
+  const onSearch = (name: string) => {
     fetchData(1, pagination.pageSize, { name });
   };
 
-  const onAdd = (flag, row) => {
+  const onAdd = (flag: string, row: { id: number; name: string }) => {
     if (flag === 'add') {
       setAddOrUpdate('add');
     } else {
@@ -188,7 +191,7 @@ export default function Categories() {
         ...data,
       });
       onCancel();
-      fetchData();
+      fetchData(1, pagination.pageSize, formParams);
     } catch (error) {
       console.log(error);
     } finally {
@@ -201,10 +204,14 @@ export default function Categories() {
     }
   };
 
-  const onDelete = async (id) => {
+  const onDelete = async (id: number) => {
     await remove({ id });
-    fetchData();
+    fetchData(pagination.current, pagination.pageSize, formParams);
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -233,7 +240,7 @@ export default function Categories() {
           data={data}
           scroll={{
             x: 1000,
-            y: 400,
+            y: 570,
           }}
         />
         <Modal

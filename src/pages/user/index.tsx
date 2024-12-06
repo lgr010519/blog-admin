@@ -36,19 +36,17 @@ function Categories() {
       title: '头像',
       dataIndex: 'avatar',
       align: 'center',
-      render: (avatar: string) => {
-        return (
-          <Avatar shape="square" size={64}>
-            <img src={avatar} alt="" />
-          </Avatar>
-        );
-      },
+      render: (avatar: string) => (
+        <Avatar shape="square" size={64}>
+          <img src={avatar} alt="" />
+        </Avatar>
+      ),
     },
     {
       title: '来源',
       dataIndex: 'provider',
       align: 'center',
-      width: 100,
+      width: 110,
     },
     {
       title: '邮箱',
@@ -60,21 +58,17 @@ function Categories() {
       dataIndex: 'articleNum',
       align: 'center',
       width: 120,
-      render: (articleNum: number) => {
-        return <Tag color="orange">{articleNum}</Tag>;
-      },
+      render: (articleNum: number) => <Tag color="orange">{articleNum}</Tag>,
     },
     {
       title: '简介',
       dataIndex: 'introduction',
       align: 'center',
-      render: (introduction: string) => {
-        return (
-          <Tooltip content={introduction} position="tl">
-            {introduction || '-'}
-          </Tooltip>
-        );
-      },
+      render: (introduction: string) => (
+        <Tooltip content={introduction} position="tl">
+          {introduction || '-'}
+        </Tooltip>
+      ),
     },
     {
       title: '注册时间',
@@ -103,11 +97,7 @@ function Categories() {
   const { data, pagination, loading, formParams } = userState;
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async (current = 1, size = 6, params = {}) => {
+  const fetchData = async (current = 1, size = 20, params = {}) => {
     dispatch({
       type: UPDATE_LOADING,
       payload: {
@@ -167,11 +157,15 @@ function Categories() {
   const onDelete = async (id: number) => {
     try {
       await remove({ id });
-      fetchData(1, 6);
+      fetchData(pagination.current, pagination.pageSize, formParams);
     } catch (error) {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -187,7 +181,7 @@ function Categories() {
           </div>
         </div>
         <Table
-          rowKey="_id"
+          rowKey="id"
           loading={loading}
           onChange={onChangeTable}
           pagination={pagination}

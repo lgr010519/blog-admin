@@ -8,8 +8,13 @@ function Footer(props: FooterProps = {}) {
   const { className, ...restProps } = props;
   return (
     <Layout.Footer className={cs(styles.footer, className)} {...restProps}>
-        <a className={cs(styles.copyRight, className)} href="https://beian.miit.gov.cn">Copyright © 2023 LIUGAORONG・湘 ICP 备 2023010519 号</a>
-        本系统由 React + Arco Design Pro 提供技术支持
+      <a
+        className={cs(styles.copyRight, className)}
+        href="https://beian.miit.gov.cn"
+      >
+        Copyright © 2023 LIUGAORONG・湘 ICP 备 2023010519 号
+      </a>
+      本系统由 React + Arco Design Pro 提供技术支持
     </Layout.Footer>
   );
 }
